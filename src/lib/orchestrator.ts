@@ -1,4 +1,3 @@
-import "server-only";
 import { qualifyTurn, type HistoryMessage } from "./anthropic";
 import { scoreLead, isQualified } from "./scoring";
 import {

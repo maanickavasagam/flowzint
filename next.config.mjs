@@ -7,6 +7,7 @@ const nextConfig = {
     return config;
   },
   experimental: {
+    instrumentationHook: true,
     serverComponentsExternalPackages: ["better-sqlite3"],
   },
 };

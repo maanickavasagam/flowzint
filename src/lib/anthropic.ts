@@ -1,4 +1,3 @@
-import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { QualificationState } from "./types";
 import {
@@ -236,35 +235,45 @@ export function fallbackTurn(
   const email = text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)?.[0];
   if (email) patch.email = email;
 
+  const t = text.toLowerCase();
+  const hasMoneySignal = /\$|\/mo|per month|a month|budget|\bk\b|dollar/.test(t);
+  const hasSizeSignal = /\b(people|employees|team|staff|person|folks|of us|headcount)\b/.test(t);
+
+  // Attribute the message primarily to the field we're currently collecting.
+  // Cross-field extraction only fires on a strong, unambiguous signal so that
+  // e.g. "600 people" is read as team size, not budget.
   if (collecting === "name" && text && !email) {
     patch.name = cleanName(text);
-  }
-  if (collecting === "industry" && text) {
+  } else if (collecting === "industry" && text) {
     patch.industry = text.slice(0, 60);
-  }
-
-  const size = bucketSize(text);
-  if (size && !state.companySizeBucket) {
-    patch.companySizeBucket = size;
+  } else if (collecting === "companySizeBucket") {
+    patch.companySizeBucket = bucketSize(text) ?? "51-500";
     patch.companySize = text.slice(0, 60);
-  }
-
-  const budget = bucketBudget(text);
-  if (budget && !state.budgetLevel) {
-    patch.budgetLevel = budget;
+  } else if (collecting === "useCaseMatch") {
+    patch.useCaseMatch = bucketUseCase(text) ?? "vague";
+    patch.useCase = text.slice(0, 80);
+  } else if (collecting === "timelineBucket") {
+    patch.timelineBucket = bucketTimeline(text) ?? "3mo+";
+    patch.timeline = text.slice(0, 60);
+  } else if (collecting === "budgetLevel") {
+    patch.budgetLevel = bucketBudget(text) ?? "vague";
     patch.budget = text.slice(0, 60);
   }
 
-  const timeline = bucketTimeline(text);
-  if (timeline && !state.timelineBucket) {
-    patch.timelineBucket = timeline;
-    patch.timeline = text.slice(0, 60);
+  // Opportunistic extraction when a visitor volunteers info out of order.
+  if (!state.companySizeBucket && !patch.companySizeBucket && hasSizeSignal) {
+    const s = bucketSize(text);
+    if (s) {
+      patch.companySizeBucket = s;
+      patch.companySize = text.slice(0, 60);
+    }
   }
-
-  const use = bucketUseCase(text);
-  if (use && !state.useCaseMatch && collecting === "useCaseMatch") {
-    patch.useCaseMatch = use;
-    patch.useCase = text.slice(0, 80);
+  if (!state.budgetLevel && !patch.budgetLevel && hasMoneySignal) {
+    const b = bucketBudget(text);
+    if (b) {
+      patch.budgetLevel = b;
+      patch.budget = text.slice(0, 60);
+    }
   }
 
   const objection = detectObjection(text);

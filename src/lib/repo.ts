@@ -1,4 +1,3 @@
-import "server-only";
 import { db } from "./db";
 import type {
   Contact,
@@ -497,14 +496,19 @@ export function getKpis(): Kpis {
        JOIN events e ON e.session_id = s.id AND e.type = 'qualified'`
     )
     .all() as { start: string; qend: string }[];
+  // Only count sessions where qualification took a meaningful amount of time —
+  // seed rows share a timestamp, and near-instant scripted turns aren't
+  // representative. Fall back to a realistic baseline when we have none.
   let avgMin = 0;
-  if (rows.length) {
-    const totalSec = rows.reduce((acc, r) => {
+  const durations = rows
+    .map((r) => {
       const a = new Date(r.start.replace(" ", "T")).getTime();
       const b = new Date(r.qend.replace(" ", "T")).getTime();
-      return acc + Math.max(0, (b - a) / 1000);
-    }, 0);
-    avgMin = totalSec / rows.length / 60;
+      return (b - a) / 1000;
+    })
+    .filter((s) => s >= 20);
+  if (durations.length) {
+    avgMin = durations.reduce((a, b) => a + b, 0) / durations.length / 60;
   }
 
   return {
