@@ -34,7 +34,7 @@ export function Hero() {
       <div className="container grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
         <motion.div variants={container} initial="hidden" animate="show">
           <motion.div variants={item}>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
               <span className="flex h-1.5 w-1.5 rounded-full bg-teal animate-pulse-glow" />
               AI concierge · qualifies + books while you sleep
             </span>

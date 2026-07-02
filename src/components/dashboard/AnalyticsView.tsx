@@ -115,7 +115,7 @@ export function AnalyticsView({
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         {/* Funnel */}
-        <div className="rounded-2xl border border-white/[0.06] bg-card/40 p-6">
+        <div className="rounded-2xl border border-border bg-card/40 p-6">
           <div className="mb-1 flex items-center justify-between">
             <h2 className="font-display text-lg font-semibold">Conversion funnel</h2>
             <Badge variant="secondary">{top} chats</Badge>
@@ -170,7 +170,7 @@ export function AnalyticsView({
         </div>
 
         {/* Trend area chart */}
-        <div className="rounded-2xl border border-white/[0.06] bg-card/40 p-6">
+        <div className="rounded-2xl border border-border bg-card/40 p-6">
           <h2 className="font-display text-lg font-semibold">Activity · 14 days</h2>
           <p className="mb-4 text-sm text-muted-foreground">
             Chats started vs. meetings booked.
@@ -263,12 +263,12 @@ export function AnalyticsView({
       </div>
 
       {/* Recent sessions */}
-      <div className="rounded-2xl border border-white/[0.06] bg-card/40">
-        <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
+      <div className="rounded-2xl border border-border bg-card/40">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h2 className="font-display text-lg font-semibold">Recent sessions</h2>
           <Badge variant="secondary">Live</Badge>
         </div>
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-border/60">
           {recent.length === 0 ? (
             <p className="px-6 py-10 text-center text-sm text-muted-foreground">
               No sessions recorded yet.

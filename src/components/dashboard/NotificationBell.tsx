@@ -50,7 +50,7 @@ export function NotificationBell() {
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <button
-          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-secondary/40 text-muted-foreground transition-colors hover:text-foreground"
+          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-secondary/40 text-muted-foreground transition-colors hover:text-foreground"
           aria-label="Notifications"
         >
           <Bell className="h-4.5 w-4.5" />
@@ -69,7 +69,7 @@ export function NotificationBell() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[360px] p-0">
-        <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <p className="text-sm font-semibold">Sales alerts</p>
           <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
             Slack · mock
@@ -84,7 +84,7 @@ export function NotificationBell() {
             items.map((n) => (
               <div
                 key={n.id}
-                className="flex gap-3 border-b border-white/[0.04] px-4 py-3 last:border-0"
+                className="flex gap-3 border-b border-border/60 px-4 py-3 last:border-0"
               >
                 <div
                   className={

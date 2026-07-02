@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { NotificationBell } from "./NotificationBell";
 import { MobileTopNav } from "./Sidebar";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const TITLES: Record<string, { title: string; subtitle: string }> = {
@@ -21,7 +22,7 @@ export function Topbar() {
   const meta = TITLES[pathname] || { title: "Dashboard", subtitle: "" };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-background/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-border bg-background/70 backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4 px-5 py-4 md:px-8">
         <div className="min-w-0">
           <h1 className="font-display text-xl font-bold tracking-tight md:text-2xl">
@@ -33,8 +34,9 @@ export function Topbar() {
         </div>
         <div className="flex items-center gap-3">
           <MobileTopNav />
+          <ThemeToggle />
           <NotificationBell />
-          <Avatar className="h-10 w-10 border border-white/[0.08]">
+          <Avatar className="h-10 w-10 border border-border">
             <AvatarFallback className="bg-gradient-to-br from-violet to-[hsl(280_90%_60%)] text-white">
               SB
             </AvatarFallback>

@@ -22,6 +22,7 @@ Next.js 14 · TypeScript · Tailwind · Framer Motion · SQLite · Anthropic Cla
 - **Answers questions** — a built-in mini-FAQ lets Zia explain what FlowZint does, how it works, and pricing, mid-conversation, plus tappable quick-reply chips.
 - **Transparent CRM** — click any lead to see *why* it scored the way it did, every captured answer, and the full transcript.
 - **Optional real integrations** — drop in env vars for real emails (Resend), Slack alerts, or an n8n webhook; all no-op cleanly when unset.
+- **Light & dark themes** — toggle in the nav / dashboard, dark by default, preference persisted.
 - **Embedded booking** — 5 generated slots across the next 3 business days, with a polished confirmation animation.
 - **Live CRM & analytics** — contacts, leads, opportunities and meetings, plus a conversion funnel with drop-off %, KPI cards and a 14-day activity chart.
 - **Works with or without an API key** — a keyless heuristic engine keeps the full demo playable offline; drop in an Anthropic key for genuinely fluent conversation.

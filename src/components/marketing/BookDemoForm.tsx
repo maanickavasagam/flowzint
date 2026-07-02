@@ -106,7 +106,7 @@ export function BookDemoForm() {
       {loading ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-2xl bg-white/[0.04]" />
+            <div key={i} className="h-16 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       ) : (
@@ -120,7 +120,7 @@ export function BookDemoForm() {
                 "flex flex-col items-start gap-1 rounded-2xl border p-3 text-left transition-all",
                 selected?.iso === s.iso
                   ? "border-primary bg-primary/15"
-                  : "border-white/[0.06] bg-secondary/40 hover:border-white/20"
+                  : "border-border bg-secondary/40 hover:border-foreground/30"
               )}
             >
               <span className="text-xs font-medium text-muted-foreground">

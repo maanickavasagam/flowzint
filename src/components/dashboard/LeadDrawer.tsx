@@ -81,13 +81,13 @@ export function LeadDrawer({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
-            className="fixed right-0 top-0 z-50 flex h-screen w-full max-w-md flex-col border-l border-white/[0.08] bg-popover shadow-2xl"
+            className="fixed right-0 top-0 z-50 flex h-screen w-full max-w-md flex-col border-l border-border bg-popover shadow-2xl"
           >
-            <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <h2 className="font-display text-lg font-semibold">Lead detail</h2>
               <button
                 onClick={onClose}
-                className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -138,7 +138,7 @@ export function LeadDrawer({
                   </div>
 
                   {/* Score breakdown — the transparency piece */}
-                  <div className="rounded-2xl border border-white/[0.06] bg-card/50 p-4">
+                  <div className="rounded-2xl border border-border bg-card/50 p-4">
                     <div className="mb-3 flex items-center justify-between">
                       <p className="text-sm font-semibold">Why this score</p>
                       <span className="text-sm font-bold">
@@ -178,7 +178,7 @@ export function LeadDrawer({
                         return (
                           <div
                             key={String(f.key)}
-                            className="flex items-start justify-between gap-3 rounded-xl border border-white/[0.05] bg-card/40 px-3 py-2"
+                            className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card/40 px-3 py-2"
                           >
                             <span className="text-xs text-muted-foreground">
                               {f.label}

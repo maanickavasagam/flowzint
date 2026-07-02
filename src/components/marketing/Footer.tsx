@@ -34,7 +34,7 @@ const COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-white/[0.06] bg-background/60">
+    <footer className="relative border-t border-border bg-background/60">
       <div className="container grid gap-10 py-14 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
           <Link href="/" className="flex items-center gap-2">
@@ -50,7 +50,7 @@ export function Footer() {
               <a
                 key={i}
                 href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.06] bg-secondary/40 text-muted-foreground transition-colors hover:text-foreground"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-secondary/40 text-muted-foreground transition-colors hover:text-foreground"
                 aria-label="social link"
               >
                 <Icon className="h-4 w-4" />
@@ -77,7 +77,7 @@ export function Footer() {
           </div>
         ))}
       </div>
-      <div className="border-t border-white/[0.06]">
+      <div className="border-t border-border">
         <div className="container flex flex-col items-center justify-between gap-3 py-6 text-xs text-muted-foreground sm:flex-row">
           <p>© {new Date().getFullYear()} FlowZint, Inc. All rights reserved.</p>
           <p>Built for the demo — a fictional product. Privacy · Terms</p>

@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandMark, BrandWordmark } from "@/components/shared/Logo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -32,23 +33,23 @@ export function Navbar() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-300",
         scrolled
-          ? "border-b border-white/[0.06] bg-background/70 backdrop-blur-xl"
+          ? "border-b border-border bg-background/70 backdrop-blur-xl"
           : "bg-transparent"
       )}
     >
-      <nav className="container flex h-16 items-center justify-between">
+      <nav className="container relative flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <BrandMark />
           <BrandWordmark className="text-lg" />
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-2 md:flex">
           {LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               className={cn(
-                "relative rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                "relative rounded-full px-5 py-2 text-sm font-medium transition-colors",
                 pathname === l.href
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -57,7 +58,7 @@ export function Navbar() {
               {pathname === l.href && (
                 <motion.span
                   layoutId="nav-pill"
-                  className="absolute inset-0 rounded-full bg-white/[0.06]"
+                  className="absolute inset-0 rounded-full bg-muted"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
               )}
@@ -67,6 +68,7 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
+          <ThemeToggle className="h-9 w-9" />
           <Button asChild variant="ghost" size="sm">
             <Link href="/crm">
               <LayoutDashboard className="h-4 w-4" />
@@ -91,7 +93,7 @@ export function Navbar() {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="border-t border-white/[0.06] bg-background/95 backdrop-blur-xl md:hidden"
+          className="border-t border-border bg-background/95 backdrop-blur-xl md:hidden"
         >
           <div className="container flex flex-col gap-1 py-4">
             {LINKS.map((l) => (
@@ -99,7 +101,7 @@ export function Navbar() {
                 key={l.href}
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                className="rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 {l.label}
               </Link>
@@ -107,7 +109,7 @@ export function Navbar() {
             <Link
               href="/crm"
               onClick={() => setMobileOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground"
+              className="rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               Dashboard
             </Link>

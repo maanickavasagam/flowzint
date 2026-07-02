@@ -13,6 +13,7 @@ import {
   RotateCcw,
   Maximize2,
   Minimize2,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -246,7 +247,7 @@ export function ChatWidget({
             )}
           >
             {/* Header */}
-            <div className="relative flex items-center gap-3 border-b border-white/[0.06] bg-gradient-to-r from-violet/20 to-transparent px-4 py-3.5">
+            <div className="relative flex items-center gap-3 border-b border-border bg-gradient-to-r from-violet/20 to-transparent px-4 py-3.5">
               <div className="relative">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet to-[hsl(280_90%_60%)] shadow-lg shadow-primary/40">
                   <Sparkles className="h-5 w-5 text-white" />
@@ -276,7 +277,16 @@ export function ChatWidget({
                     <Maximize2 className="h-4 w-4" />
                   )}
                 </IconBtn>
-                <IconBtn label="Minimize" onClick={() => setOpen(false)}>
+                <IconBtn
+                  label="Minimize"
+                  onClick={() => {
+                    setExpanded(false);
+                    setOpen(false);
+                  }}
+                >
+                  <ChevronDown className="h-5 w-5" />
+                </IconBtn>
+                <IconBtn label="Close" onClick={() => setOpen(false)}>
                   <X className="h-5 w-5" />
                 </IconBtn>
               </div>
@@ -315,7 +325,7 @@ export function ChatWidget({
 
             {/* Quick replies */}
             {options.length > 0 && !typing && (
-              <div className="flex flex-wrap gap-2 border-t border-white/[0.06] px-3 pt-3">
+              <div className="flex flex-wrap gap-2 border-t border-border px-3 pt-3">
                 {options.map((opt) => (
                   <button
                     key={opt}
@@ -334,7 +344,7 @@ export function ChatWidget({
                 e.preventDefault();
                 send(input);
               }}
-              className="flex items-center gap-2 border-t border-white/[0.06] bg-background/40 p-3"
+              className="flex items-center gap-2 border-t border-border bg-background/40 p-3"
             >
               <Input
                 value={input}
@@ -378,7 +388,7 @@ function IconBtn({
       aria-label={label}
       title={label}
       className={cn(
-        "flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground",
+        "flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
         className
       )}
     >
@@ -527,7 +537,7 @@ function BookingCard({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-white/[0.06] bg-card/70 p-4"
+      className="rounded-2xl border border-border bg-card/70 p-4"
     >
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
         <CalendarCheck className="h-4 w-4 text-primary" />
@@ -536,7 +546,7 @@ function BookingCard({
       {loading ? (
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-9 animate-pulse rounded-xl bg-white/5" />
+            <div key={i} className="h-9 animate-pulse rounded-xl bg-muted" />
           ))}
         </div>
       ) : (
@@ -549,7 +559,7 @@ function BookingCard({
                 "rounded-xl border px-2 py-2 text-xs font-medium transition-all",
                 selected?.iso === s.iso
                   ? "border-primary bg-primary/15 text-foreground"
-                  : "border-border bg-secondary/40 text-muted-foreground hover:border-white/20 hover:text-foreground"
+                  : "border-border bg-secondary/40 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
               )}
             >
               <span className="block">{s.day}</span>
@@ -631,7 +641,7 @@ function NewsletterCard({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-white/[0.06] bg-card/70 p-4"
+      className="rounded-2xl border border-border bg-card/70 p-4"
     >
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
         <BookOpen className="h-4 w-4 text-accent" />

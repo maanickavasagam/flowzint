@@ -59,7 +59,7 @@ export function KpiCard({
 }) {
   const up = (delta ?? 0) >= 0;
   return (
-    <div className="group rounded-2xl border border-white/[0.06] bg-card/50 p-5 transition-all hover:border-white/[0.12]">
+    <div className="group rounded-2xl border border-border bg-card/50 p-5 transition-all hover:border-foreground/20">
       <div className="flex items-start justify-between">
         <div
           className="flex h-10 w-10 items-center justify-center rounded-xl"

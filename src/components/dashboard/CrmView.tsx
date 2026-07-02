@@ -459,7 +459,7 @@ export function CrmView({
 
 function Panel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-4 overflow-hidden rounded-2xl border border-white/[0.06] bg-card/40">
+    <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card/40">
       {children}
     </div>
   );
@@ -481,7 +481,7 @@ function Row({
       transition={{ delay: Math.min(i * 0.03, 0.3) }}
       onClick={onClick}
       className={cn(
-        "border-b border-border/60 transition-colors hover:bg-white/[0.02]",
+        "border-b border-border/60 transition-colors hover:bg-muted/50",
         onClick && "cursor-pointer"
       )}
     >

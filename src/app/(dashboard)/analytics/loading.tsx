@@ -7,7 +7,7 @@ export default function AnalyticsLoading() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-2xl border border-white/[0.06] bg-card/50 p-5"
+            className="rounded-2xl border border-border bg-card/50 p-5"
           >
             <Skeleton className="h-10 w-10 rounded-xl" />
             <Skeleton className="mt-4 h-8 w-20" />

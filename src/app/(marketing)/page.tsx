@@ -103,7 +103,7 @@ export default function HomePage() {
       <Hero />
 
       {/* Logo cloud */}
-      <section className="border-y border-white/[0.06] bg-background/40 py-10">
+      <section className="border-y border-border bg-background/40 py-10">
         <div className="container">
           <p className="mb-6 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Trusted by fast-moving revenue teams
@@ -140,7 +140,7 @@ export default function HomePage() {
           <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f, i) => (
               <Reveal key={f.title} delay={i * 0.05}>
-                <div className="group h-full rounded-2xl border border-white/[0.06] bg-card/50 p-6 transition-all hover:-translate-y-1 hover:border-white/[0.12] hover:bg-card/70">
+                <div className="group h-full rounded-2xl border border-border bg-card/50 p-6 transition-all hover:-translate-y-1 hover:border-foreground/20 hover:bg-card/70">
                   <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/12 text-primary transition-colors group-hover:bg-primary/20">
                     <f.icon className="h-5 w-5" />
                   </div>
@@ -168,8 +168,8 @@ export default function HomePage() {
           <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
               <Reveal key={s.n} delay={i * 0.08}>
-                <div className="relative h-full rounded-2xl border border-white/[0.06] bg-card/50 p-6">
-                  <span className="font-display text-4xl font-bold text-white/[0.08]">
+                <div className="relative h-full rounded-2xl border border-border bg-card/50 p-6">
+                  <span className="font-display text-4xl font-bold text-foreground/10">
                     {s.n}
                   </span>
                   <h3 className="mt-2 font-display text-lg font-semibold">
@@ -200,7 +200,7 @@ export default function HomePage() {
           <div className="mt-14 grid gap-5 lg:grid-cols-3">
             {TESTIMONIALS.map((t, i) => (
               <Reveal key={t.name} delay={i * 0.06}>
-                <figure className="flex h-full flex-col rounded-2xl border border-white/[0.06] bg-card/50 p-6">
+                <figure className="flex h-full flex-col rounded-2xl border border-border bg-card/50 p-6">
                   <Quote className="h-7 w-7 text-primary/40" />
                   <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-foreground/90">
                     “{t.quote}”
@@ -210,7 +210,7 @@ export default function HomePage() {
                       <Star key={s} className="h-3.5 w-3.5 fill-current" />
                     ))}
                   </div>
-                  <figcaption className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-4">
+                  <figcaption className="mt-4 flex items-center justify-between border-t border-border pt-4">
                     <div>
                       <p className="text-sm font-semibold">{t.name}</p>
                       <p className="text-xs text-muted-foreground">{t.role}</p>
@@ -229,7 +229,7 @@ export default function HomePage() {
       {/* CTA */}
       <section className="relative py-24">
         <div className="container">
-          <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] p-10 md:p-16">
+          <div className="relative overflow-hidden rounded-3xl border border-border p-10 md:p-16">
             <AuroraBackground />
             <Reveal className="mx-auto max-w-2xl text-center">
               <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">

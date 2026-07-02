@@ -77,7 +77,7 @@ export default function PricingPage() {
       <AuroraBackground />
       <div className="container">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-xs font-medium text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 text-primary" /> Simple, honest pricing
           </span>
           <h1 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
@@ -97,7 +97,7 @@ export default function PricingPage() {
                   "group relative flex h-full flex-col rounded-3xl border p-7 transition-all duration-300 hover:-translate-y-1.5",
                   t.highlighted
                     ? "border-primary/40 bg-card/70 shadow-2xl shadow-primary/20"
-                    : "border-white/[0.06] bg-card/40 hover:border-white/[0.14]"
+                    : "border-border bg-card/40 hover:border-foreground/20"
                 )}
               >
                 {t.highlighted && (
@@ -133,7 +133,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <div className="mx-auto mt-20 max-w-6xl rounded-3xl border border-white/[0.06] bg-card/40 p-8 text-center md:flex md:items-center md:justify-between md:text-left">
+        <div className="mx-auto mt-20 max-w-6xl rounded-3xl border border-border bg-card/40 p-8 text-center md:flex md:items-center md:justify-between md:text-left">
           <div>
             <h3 className="font-display text-xl font-bold">Need something custom?</h3>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -155,7 +155,7 @@ export default function PricingPage() {
           <div className="mt-10 space-y-4">
             {FAQ.map((f, i) => (
               <Reveal key={f.q} delay={i * 0.05}>
-                <div className="rounded-2xl border border-white/[0.06] bg-card/40 p-6">
+                <div className="rounded-2xl border border-border bg-card/40 p-6">
                   <h3 className="font-semibold">{f.q}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {f.a}

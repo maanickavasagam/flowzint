@@ -27,7 +27,7 @@ export default function BookDemoPage() {
       <AuroraBackground />
       <div className="container grid items-start gap-12 lg:grid-cols-[1fr_1fr]">
         <Reveal>
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-xs font-medium text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
             <span className="flex h-1.5 w-1.5 rounded-full bg-teal animate-pulse-glow" />
             Live in a day · no card required
           </span>
