@@ -102,6 +102,7 @@ function buildQualification(p: Persona): QualificationState {
     timelineBucket: p.timeline,
     currentTools: pick(["HubSpot", "Intercom + spreadsheets", "Drift", "nothing yet", "Salesforce"]),
     objectionsRaised: [],
+    spamFlags: 0,
   };
 }
 

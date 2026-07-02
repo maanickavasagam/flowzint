@@ -4,8 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Zap, Menu, X, LayoutDashboard } from "lucide-react";
+import { Menu, X, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandMark, BrandWordmark } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -37,12 +38,8 @@ export function Navbar() {
     >
       <nav className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet to-[hsl(280_90%_60%)] shadow-lg shadow-primary/40">
-            <Zap className="h-4.5 w-4.5 text-white" fill="currentColor" />
-          </span>
-          <span className="font-display text-lg font-bold tracking-tight">
-            Flow<span className="gradient-text">Zint</span>
-          </span>
+          <BrandMark />
+          <BrandWordmark className="text-lg" />
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">

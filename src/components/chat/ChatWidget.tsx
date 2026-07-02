@@ -10,6 +10,9 @@ import {
   Check,
   BookOpen,
   Loader2,
+  RotateCcw,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +33,10 @@ interface TurnActions {
 
 const SID_KEY = "flowzint_sid";
 
+function newSid() {
+  return `sess_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
+}
+
 export function ChatWidget({
   page,
   autoOpen = false,
@@ -38,11 +45,13 @@ export function ChatWidget({
   autoOpen?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(false);
   const [booted, setBooted] = React.useState(false);
   const [messages, setMessages] = React.useState<UiMessage[]>([]);
   const [input, setInput] = React.useState("");
   const [typing, setTyping] = React.useState(false);
   const [actions, setActions] = React.useState<TurnActions>({});
+  const [options, setOptions] = React.useState<string[]>([]);
   const [sessionId, setSessionId] = React.useState<string>("");
   const [unread, setUnread] = React.useState(0);
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -56,7 +65,7 @@ export function ChatWidget({
       /* ignore */
     }
     if (!sid) {
-      sid = `sess_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
+      sid = newSid();
       try {
         localStorage.setItem(SID_KEY, sid);
       } catch {
@@ -69,12 +78,7 @@ export function ChatWidget({
   // Auto-open after 8s on qualifying pages.
   React.useEffect(() => {
     if (!autoOpen) return;
-    const t = setTimeout(() => {
-      setOpen((o) => {
-        if (!o) return true;
-        return o;
-      });
-    }, 8000);
+    const t = setTimeout(() => setOpen((o) => o || true), 8000);
     return () => clearTimeout(t);
   }, [autoOpen]);
 
@@ -82,6 +86,13 @@ export function ChatWidget({
   React.useEffect(() => {
     const t = setTimeout(() => setUnread((u) => (open ? u : 1)), 3000);
     return () => clearTimeout(t);
+  }, [open]);
+
+  // Let the marketing hero know to hide its decorative mock when we're open.
+  React.useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("flowzint:chat", { detail: { open } })
+    );
   }, [open]);
 
   const scrollToBottom = React.useCallback(() => {
@@ -95,9 +106,9 @@ export function ChatWidget({
 
   React.useEffect(() => {
     if (open) scrollToBottom();
-  }, [messages, typing, actions, open, scrollToBottom]);
+  }, [messages, typing, actions, options, open, scrollToBottom]);
 
-  // Boot conversation on first open.
+  // Boot conversation on first open (or after a reset).
   React.useEffect(() => {
     if (open && !booted && sessionId) {
       setUnread(0);
@@ -111,8 +122,15 @@ export function ChatWidget({
         .then((r) => r.json())
         .then((data) => {
           setTyping(false);
-          if (data.reply)
+          if (Array.isArray(data.history) && data.history.length) {
+            setMessages(
+              data.history.map((m: UiMessage) => ({ ...m, id: uid() }))
+            );
+          } else if (data.reply) {
             setMessages([{ id: uid(), role: "assistant", content: data.reply }]);
+          }
+          setActions(data.actions || {});
+          setOptions(data.options || []);
         })
         .catch(() => {
           setTyping(false);
@@ -133,6 +151,7 @@ export function ChatWidget({
     if (!trimmed || typing) return;
     setInput("");
     setActions({});
+    setOptions([]);
     setMessages((m) => [...m, { id: uid(), role: "user", content: trimmed }]);
     setTyping(true);
     try {
@@ -141,7 +160,6 @@ export function ChatWidget({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, page, message: trimmed }),
       }).then((r) => r.json());
-      // Small artificial delay so the typing indicator reads naturally.
       await new Promise((r) => setTimeout(r, 380));
       setTyping(false);
       if (res.reply)
@@ -150,6 +168,7 @@ export function ChatWidget({
           { id: uid(), role: "assistant", content: res.reply },
         ]);
       setActions(res.actions || {});
+      setOptions(res.options || []);
     } catch {
       setTyping(false);
       setMessages((m) => [
@@ -161,6 +180,25 @@ export function ChatWidget({
         },
       ]);
     }
+  }
+
+  function startNewChat() {
+    const sid = newSid();
+    try {
+      localStorage.setItem(SID_KEY, sid);
+    } catch {
+      /* ignore */
+    }
+    setMessages([]);
+    setActions({});
+    setOptions([]);
+    setInput("");
+    setSessionId(sid);
+    setBooted(false); // triggers the boot effect for a fresh greeting
+  }
+
+  function pushAssistant(content: string) {
+    setMessages((m) => [...m, { id: uid(), role: "assistant", content }]);
   }
 
   return (
@@ -200,7 +238,12 @@ export function ChatWidget({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.92 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            className="fixed bottom-6 right-6 z-[60] flex h-[600px] max-h-[calc(100vh-3rem)] w-[calc(100vw-3rem)] max-w-[400px] flex-col overflow-hidden rounded-3xl glass-strong"
+            className={cn(
+              "fixed bottom-6 right-6 z-[60] flex max-h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-3xl glass-strong",
+              expanded
+                ? "h-[720px] w-[calc(100vw-3rem)] max-w-[560px]"
+                : "h-[600px] w-[calc(100vw-3rem)] max-w-[400px]"
+            )}
           >
             {/* Header */}
             <div className="relative flex items-center gap-3 border-b border-white/[0.06] bg-gradient-to-r from-violet/20 to-transparent px-4 py-3.5">
@@ -218,13 +261,25 @@ export function ChatWidget({
                   FlowZint AI concierge · online
                 </p>
               </div>
-              <button
-                onClick={() => setOpen(false)}
-                className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
-                aria-label="Close chat"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-0.5">
+                <IconBtn label="New chat" onClick={startNewChat}>
+                  <RotateCcw className="h-4 w-4" />
+                </IconBtn>
+                <IconBtn
+                  label={expanded ? "Shrink" : "Expand"}
+                  onClick={() => setExpanded((e) => !e)}
+                  className="hidden sm:flex"
+                >
+                  {expanded ? (
+                    <Minimize2 className="h-4 w-4" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4" />
+                  )}
+                </IconBtn>
+                <IconBtn label="Minimize" onClick={() => setOpen(false)}>
+                  <X className="h-5 w-5" />
+                </IconBtn>
+              </div>
             </div>
 
             {/* Messages */}
@@ -238,7 +293,16 @@ export function ChatWidget({
               {typing && <TypingIndicator />}
 
               {actions.booking && (
-                <BookingCard sessionId={sessionId} onDone={() => setActions({})} />
+                <BookingCard
+                  sessionId={sessionId}
+                  onConfirmed={(label, email) => {
+                    setActions({});
+                    pushAssistant(
+                      `✅ You're confirmed for ${label}. I've sent the invite to ${email} — see you then!`
+                    );
+                  }}
+                  onDone={() => setActions({})}
+                />
               )}
               {actions.newsletter && (
                 <NewsletterCard
@@ -248,6 +312,21 @@ export function ChatWidget({
                 />
               )}
             </div>
+
+            {/* Quick replies */}
+            {options.length > 0 && !typing && (
+              <div className="flex flex-wrap gap-2 border-t border-white/[0.06] px-3 pt-3">
+                {options.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => send(opt)}
+                    className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Composer */}
             <form
@@ -282,6 +361,32 @@ export function ChatWidget({
   );
 }
 
+function IconBtn({
+  children,
+  label,
+  onClick,
+  className,
+}: {
+  children: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className={cn(
+        "flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground",
+        className
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 function MessageBubble({ message }: { message: UiMessage }) {
   const isUser = message.role === "user";
   return (
@@ -290,7 +395,7 @@ function MessageBubble({ message }: { message: UiMessage }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       className={cn(
-        "flex items-end gap-2",
+        "flex items-start gap-2",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
@@ -308,8 +413,8 @@ function MessageBubble({ message }: { message: UiMessage }) {
         className={cn(
           "max-w-[78%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
           isUser
-            ? "rounded-br-md bg-primary text-primary-foreground"
-            : "rounded-bl-md bg-secondary/80 text-foreground"
+            ? "rounded-tr-md bg-primary text-primary-foreground"
+            : "rounded-tl-md bg-secondary/80 text-foreground"
         )}
       >
         {message.content}
@@ -334,11 +439,7 @@ function TypingIndicator() {
             key={i}
             className="h-1.5 w-1.5 rounded-full bg-muted-foreground"
             animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
-            transition={{
-              duration: 1,
-              repeat: Infinity,
-              delay: i * 0.15,
-            }}
+            transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
           />
         ))}
       </div>
@@ -349,9 +450,11 @@ function TypingIndicator() {
 function BookingCard({
   sessionId,
   onDone,
+  onConfirmed,
 }: {
   sessionId: string;
   onDone: () => void;
+  onConfirmed?: (label: string, email: string) => void;
 }) {
   const [slots, setSlots] = React.useState<BookingSlot[]>([]);
   const [selected, setSelected] = React.useState<BookingSlot | null>(null);
@@ -387,6 +490,7 @@ function BookingCard({
         }),
       });
       setConfirmed(selected);
+      onConfirmed?.(selected.label, email);
     } finally {
       setSubmitting(false);
     }
@@ -408,18 +512,11 @@ function BookingCard({
           <Check className="h-7 w-7 text-teal" />
         </motion.div>
         <p className="font-display text-base font-semibold">You&apos;re booked! 🎉</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {confirmed.label}
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{confirmed.label}</p>
         <p className="mt-2 text-xs text-muted-foreground">
           A calendar invite is on its way to {email}.
         </p>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="mt-4"
-          onClick={onDone}
-        >
+        <Button variant="secondary" size="sm" className="mt-4" onClick={onDone}>
           Done
         </Button>
       </motion.div>

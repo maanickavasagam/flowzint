@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Flame, Check } from "lucide-react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { AuroraBackground } from "./AuroraBackground";
+import { cn } from "@/lib/utils";
 
 const container = {
   hidden: {},
@@ -16,6 +18,16 @@ const item = {
 };
 
 export function Hero() {
+  // Hide the decorative mock while the real chat widget is open so they never
+  // visually collide in the corner.
+  const [chatOpen, setChatOpen] = React.useState(false);
+  React.useEffect(() => {
+    const handler = (e: Event) =>
+      setChatOpen(Boolean((e as CustomEvent).detail?.open));
+    window.addEventListener("flowzint:chat", handler);
+    return () => window.removeEventListener("flowzint:chat", handler);
+  }, []);
+
   return (
     <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
       <AuroraBackground />
@@ -74,7 +86,10 @@ export function Hero() {
           initial={{ opacity: 0, y: 40, rotateX: 8 }}
           animate={{ opacity: 1, y: 0, rotateX: 0 }}
           transition={{ duration: 0.9, delay: 0.2 }}
-          className="relative"
+          className={cn(
+            "relative transition-opacity duration-300",
+            chatOpen && "pointer-events-none opacity-0"
+          )}
         >
           <div className="gradient-border relative rounded-3xl glass-strong p-5">
             <div className="mb-4 flex items-center gap-3">

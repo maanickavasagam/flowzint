@@ -156,6 +156,42 @@ export function listLeads(): LeadWithContact[] {
     .all() as LeadWithContact[];
 }
 
+export interface LeadDetail {
+  lead: LeadWithContact;
+  messages: ChatMessageDTO[];
+  qualification: QualificationState;
+  breakdown: ScoreBreakdown;
+}
+
+export function getLeadDetail(leadId: number): LeadDetail | null {
+  const lead = db
+    .prepare(
+      `SELECT l.*, c.name AS contact_name, c.email AS contact_email,
+              c.company AS contact_company
+       FROM leads l JOIN contacts c ON c.id = l.contact_id
+       WHERE l.id = ?`
+    )
+    .get(leadId) as LeadWithContact | undefined;
+  if (!lead) return null;
+
+  const messages = lead.session_id ? listMessages(lead.session_id) : [];
+
+  let qualification: QualificationState;
+  let breakdown: ScoreBreakdown;
+  try {
+    qualification = JSON.parse(lead.qualification);
+  } catch {
+    qualification = {} as QualificationState;
+  }
+  try {
+    breakdown = JSON.parse(lead.score_breakdown);
+  } catch {
+    breakdown = {} as ScoreBreakdown;
+  }
+
+  return { lead, messages, qualification, breakdown };
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Opportunities                                                              */
 /* -------------------------------------------------------------------------- */

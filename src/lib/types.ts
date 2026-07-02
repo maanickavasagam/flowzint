@@ -45,6 +45,8 @@ export interface QualificationState {
   timelineBucket: "<1mo" | "1-3mo" | "3mo+" | null;
   currentTools: string | null;
   objectionsRaised: string[];
+  // Count of profane / nonsense messages — flags low-quality or troll sessions.
+  spamFlags: number;
 }
 
 export interface ScoreBreakdown {

@@ -82,6 +82,7 @@ export default function CrmPage() {
         }))}
         opportunities={opportunities.map((o) => ({
           id: o.id,
+          lead_id: o.lead_id,
           name: o.name,
           contact_company: o.contact_company,
           stage: o.stage,
@@ -91,6 +92,7 @@ export default function CrmPage() {
         }))}
         meetings={meetings.map((m) => ({
           id: m.id,
+          lead_id: m.lead_id,
           name: m.name,
           email: m.email,
           company: m.company,

@@ -10,6 +10,7 @@ import {
   logEvent,
   createNotification,
 } from "@/lib/repo";
+import { sendBookingConfirmation, triggerN8n } from "@/lib/integrations";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -78,7 +79,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ ok: true, meeting });
+    // Best-effort real-world side effects (no-op unless env vars are set).
+    const emailed = await sendBookingConfirmation({
+      to: email,
+      name,
+      slotLabel: meeting.slot_label,
+    });
+    void triggerN8n("meeting_booked", {
+      name,
+      email,
+      slot: meeting.slot_label,
+      sessionId: sessionId ?? null,
+    });
+
+    return NextResponse.json({ ok: true, meeting, emailed });
   } catch (err) {
     console.error("[/api/booking] error", err);
     return NextResponse.json({ error: "Booking failed." }, { status: 500 });

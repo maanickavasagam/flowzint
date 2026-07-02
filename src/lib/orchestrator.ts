@@ -4,8 +4,16 @@ import {
   EMPTY_STATE,
   mergeState,
   routingMessage,
+  postRoutingReply,
   OBJECTION_REBUTTALS,
   NURTURE_RESOURCE,
+  nextMissingField,
+  quickRepliesFor,
+  moderateMessage,
+  moderationReply,
+  answerQuestion,
+  SPAM_LIMIT,
+  SPAM_SHUTDOWN,
 } from "./conversation";
 import {
   getSession,
@@ -19,6 +27,7 @@ import {
   createNotification,
   logEvent,
 } from "./repo";
+import { notifyHotLead } from "./integrations";
 import type { QualificationState, LeadTemperature, LeadStatus } from "./types";
 
 export interface TurnResponse {
@@ -29,11 +38,21 @@ export interface TurnResponse {
     newsletter?: boolean;
     resource?: { title: string; description: string; url: string };
   };
+  options?: string[];
+  history?: { role: "assistant" | "user"; content: string }[];
   greeting?: boolean;
 }
 
 const GREETING =
-  "Hi there! I'm Zia, FlowZint's AI concierge 👋 I'll ask a couple of quick questions to point you in the right direction. First up — what's your name?";
+  "Hi there! I'm Zia, FlowZint's AI concierge 👋 I qualify visitors, answer questions, and book demos. To point you in the right direction — what's your name?";
+
+function currentQuestion(state: QualificationState): string {
+  return nextMissingField(state)?.question ?? "";
+}
+
+function currentOptions(state: QualificationState): string[] | undefined {
+  return quickRepliesFor(nextMissingField(state)?.field);
+}
 
 export async function startSession(
   sessionId: string,
@@ -44,15 +63,29 @@ export async function startSession(
     session = createSession({ id: sessionId, page });
     logEvent({ sessionId, type: "chat_started", meta: { page } });
   }
-  const existing = listMessages(sessionId);
+  let existing = listMessages(sessionId);
   if (existing.length === 0) {
     addMessage({ sessionId, role: "assistant", content: GREETING });
-    return { sessionId, reply: GREETING, actions: {}, greeting: true };
+    existing = listMessages(sessionId);
   }
+  const state = safeParseState(session.qualification);
+  const routed =
+    session.status === "qualified" ||
+    session.status === "booked" ||
+    session.status === "nurture";
   return {
     sessionId,
     reply: existing[existing.length - 1].content,
-    actions: {},
+    actions: routed
+      ? session.status === "nurture"
+        ? { newsletter: true, resource: NURTURE_RESOURCE }
+        : { booking: true }
+      : {},
+    options: routed ? undefined : currentOptions(state),
+    history: existing
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
+    greeting: existing.length === 1,
   };
 }
 
@@ -88,6 +121,39 @@ export async function processTurn(input: {
   // Record the visitor's message.
   addMessage({ sessionId, role: "user", content: message });
 
+  /* ---- Moderation gate: reject profanity / gibberish before scoring ------ */
+  const mod = moderateMessage(message);
+  if (mod.blocked) {
+    state.spamFlags = (state.spamFlags ?? 0) + 1;
+    updateSession(sessionId, { qualification: state });
+
+    if (state.spamFlags >= SPAM_LIMIT) {
+      updateSession(sessionId, { status: "closed" });
+      addMessage({ sessionId, role: "assistant", content: SPAM_SHUTDOWN });
+      return { sessionId, reply: SPAM_SHUTDOWN, actions: {} };
+    }
+    const q = currentQuestion(state);
+    const reply = q ? `${moderationReply(mod.reason)}\n\n${q}` : moderationReply(mod.reason);
+    addMessage({ sessionId, role: "assistant", content: reply });
+    return { sessionId, reply, actions: {}, options: currentOptions(state) };
+  }
+
+  /* ---- Mini-FAQ: answer product questions without losing our place ------- */
+  const alreadyRouted =
+    session.status === "qualified" ||
+    session.status === "booked" ||
+    session.status === "nurture";
+
+  if (!alreadyRouted) {
+    const faq = answerQuestion(message);
+    if (faq) {
+      const q = currentQuestion(state);
+      const reply = q ? `${faq}\n\n${q}` : faq;
+      addMessage({ sessionId, role: "assistant", content: reply });
+      return { sessionId, reply, actions: {}, options: currentOptions(state) };
+    }
+  }
+
   const history: HistoryMessage[] = listMessages(sessionId)
     .filter((m) => m.role === "user" || m.role === "assistant")
     .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }))
@@ -110,7 +176,9 @@ export async function processTurn(input: {
 
   // Score with the pure function — never the LLM.
   const breakdown = scoreLead(state);
-  const temperature: LeadTemperature = breakdown.temperature;
+  // Flagged (troll) sessions are capped to cold so they never alert sales.
+  const flagged = (state.spamFlags ?? 0) >= 2;
+  const temperature: LeadTemperature = flagged ? "cold" : breakdown.temperature;
 
   // Persist contact + lead as soon as we have an email.
   let contactId = session.contact_id ?? null;
@@ -134,7 +202,7 @@ export async function processTurn(input: {
       score: breakdown.total,
       temperature,
       qualification: state,
-      breakdown,
+      breakdown: { ...breakdown, temperature },
     });
     leadId = lead.id;
 
@@ -154,15 +222,12 @@ export async function processTurn(input: {
   // Compose reply + decide routing.
   const actions: TurnResponse["actions"] = {};
   let reply = turn.reply;
-
-  const alreadyRouted =
-    session.status === "qualified" ||
-    session.status === "booked" ||
-    session.status === "nurture";
+  let options = currentOptions(state);
 
   if (isQualified(state) && !alreadyRouted) {
     logEvent({ sessionId, leadId, type: "qualified" });
     reply = routingMessage(temperature, state.name);
+    options = undefined;
 
     if (temperature === "hot" || temperature === "warm") {
       actions.booking = true;
@@ -180,18 +245,22 @@ export async function processTurn(input: {
           probability: 60,
         });
         logEvent({ sessionId, leadId, type: "opportunity_created" });
+        const title = `🔥 Hot lead: ${state.name ?? "Unknown"}`;
+        const body = `${state.name ?? "A visitor"}${
+          state.industry ? ` (${state.industry})` : ""
+        } scored ${breakdown.total}/13 — team size ${
+          state.companySizeBucket ?? "?"
+        }, timeline ${state.timelineBucket ?? "?"}. Demo offered. Reach out fast!`;
         createNotification({
           leadId,
           sessionId,
           channel: "#sales-hot-leads",
-          title: `🔥 Hot lead: ${state.name ?? "Unknown"}`,
-          body: `${state.name ?? "A visitor"}${
-            state.industry ? ` (${state.industry})` : ""
-          } scored ${breakdown.total}/11 — team size ${
-            state.companySizeBucket ?? "?"
-          }, timeline ${state.timelineBucket ?? "?"}. Demo offered. Reach out fast!`,
+          title,
+          body,
           temperature,
         });
+        // Best-effort real Slack webhook if configured (no-op otherwise).
+        void notifyHotLead(title, body);
       }
     } else {
       // Cold → nurture.
@@ -201,9 +270,12 @@ export async function processTurn(input: {
       logEvent({ sessionId, leadId, type: "nurture_sent" });
     }
   } else if (alreadyRouted) {
-    // Post-routing: keep offering the relevant next step.
-    if (session.status === "qualified") actions.booking = true;
-    if (session.status === "nurture") {
+    // Post-routing: contextual nudge toward the relevant next step.
+    const st = session.status as "qualified" | "booked" | "nurture";
+    reply = postRoutingReply(st, state.name);
+    options = undefined;
+    if (st === "qualified") actions.booking = true;
+    if (st === "nurture") {
       actions.newsletter = true;
       actions.resource = NURTURE_RESOURCE;
     }
@@ -212,7 +284,7 @@ export async function processTurn(input: {
   const finalReply = rebuttal ? `${rebuttal}\n\n${reply}` : reply;
   addMessage({ sessionId, role: "assistant", content: finalReply });
 
-  return { sessionId, reply: finalReply, actions };
+  return { sessionId, reply: finalReply, actions, options };
 }
 
 function safeParseState(json: string): QualificationState {

@@ -18,6 +18,10 @@ Next.js 14 · TypeScript · Tailwind · Framer Motion · SQLite · Anthropic Cla
 - **Deterministic scoring** — a pure function grades company size, budget, timeline and use-case fit on a transparent **0–11 rubric**. The LLM never guesses the score.
 - **Smart routing** — Hot → instant booking + Slack alert; Warm → booking offer; Cold → nurture resource + newsletter capture.
 - **Objection handling** — "too expensive", "not ready", "need approval" and "just exploring" are detected mid-conversation and answered with canned rebuttals.
+- **Anti-troll moderation** — profanity/gibberish answers are rejected and re-prompted (rule-based, no key needed); repeat offenders are flagged and never alert sales.
+- **Answers questions** — a built-in mini-FAQ lets Zia explain what FlowZint does, how it works, and pricing, mid-conversation, plus tappable quick-reply chips.
+- **Transparent CRM** — click any lead to see *why* it scored the way it did, every captured answer, and the full transcript.
+- **Optional real integrations** — drop in env vars for real emails (Resend), Slack alerts, or an n8n webhook; all no-op cleanly when unset.
 - **Embedded booking** — 5 generated slots across the next 3 business days, with a polished confirmation animation.
 - **Live CRM & analytics** — contacts, leads, opportunities and meetings, plus a conversion funnel with drop-off %, KPI cards and a 14-day activity chart.
 - **Works with or without an API key** — a keyless heuristic engine keeps the full demo playable offline; drop in an Anthropic key for genuinely fluent conversation.
@@ -126,23 +130,25 @@ slack_notifications
 
 ## 🎯 Scoring rubric
 
-Scoring is a **pure function** (`src/lib/scoring.ts`) — fully deterministic, testable, and never LLM-guessed.
+Scoring is a **pure function** (`src/lib/scoring.ts`) — fully deterministic, testable, and never LLM-guessed. It's **intent-first**: budget, timeline and use-case fit dominate, and company size is only a small modifier — so a small-but-serious, well-funded, urgent buyer is never mislabelled as cold.
 
 | Dimension        | Signal                          | Points |
 | ---------------- | ------------------------------- | :----: |
-| **Company size** | 1–50                            |   1    |
-|                  | 51–500                          |   2    |
-|                  | 500+                            |   3    |
-| **Budget**       | at/above anchor tier ($499/mo)  |   3    |
-|                  | vague / unsure                  |   1    |
+| **Budget**       | at/above anchor tier ($499/mo)  |   4    |
+|                  | vague / unsure                  |   2    |
 |                  | below tier                      |   0    |
-| **Timeline**     | < 1 month                       |   3    |
+| **Timeline**     | < 1 month                       |   4    |
 |                  | 1–3 months                      |   2    |
 |                  | 3 months+ / exploring           |   1    |
-| **Use-case fit** | clear match                     |   2    |
-|                  | vague                           |   0    |
+| **Use-case fit** | clear match                     |   3    |
+|                  | vague                           |   1    |
+| **Company size** | 500+                            |   2    |
+| _(modifier)_     | 51–500                          |   1    |
+|                  | 1–50                            |   0    |
 
-**Total 0–11 →** `0–4` **Cold** 🔵 · `5–7` **Warm** 🟠 · `8–11` **Hot** 🔴
+**Total 0–13 →** `0–4` **Cold** 🔵 · `5–8` **Warm** 🟠 · `9–13` **Hot** 🔴
+
+The full breakdown (how each dimension contributed) is visible per-lead in the CRM — click any lead row to open its detail drawer with the score rationale, captured answers, and full chat transcript.
 
 | Temperature | Routing                                                        |
 | ----------- | -------------------------------------------------------------- |

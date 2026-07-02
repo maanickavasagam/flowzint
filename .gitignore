@@ -13,8 +13,13 @@
 # database
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 *.sqlite
 /data/*.db
+
+# local tooling
+.claude/
 
 # env
 .env

@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Snowflake, Flame, Thermometer } from "lucide-react";
 import type { LeadTemperature } from "@/lib/types";
+import { MAX_SCORE } from "@/lib/scoring";
 import { cn } from "@/lib/utils";
 
 const CONFIG: Record<
@@ -28,7 +29,7 @@ export function LeadBadge({
       <Icon className="h-3 w-3" />
       {c.label}
       {typeof score === "number" && (
-        <span className="opacity-70">· {score}/11</span>
+        <span className="opacity-70">· {score}/{MAX_SCORE}</span>
       )}
     </Badge>
   );

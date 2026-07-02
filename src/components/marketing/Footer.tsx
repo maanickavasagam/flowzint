@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Zap, Github, Twitter, Linkedin } from "lucide-react";
+import { Github, Twitter, Linkedin } from "lucide-react";
+import { BrandMark, BrandWordmark } from "@/components/shared/Logo";
 
 const COLUMNS = [
   {
@@ -37,12 +38,8 @@ export function Footer() {
       <div className="container grid gap-10 py-14 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet to-[hsl(280_90%_60%)]">
-              <Zap className="h-4.5 w-4.5 text-white" fill="currentColor" />
-            </span>
-            <span className="font-display text-lg font-bold">
-              Flow<span className="gradient-text">Zint</span>
-            </span>
+            <BrandMark />
+            <BrandWordmark className="text-lg" />
           </Link>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             The AI concierge that turns anonymous website traffic into booked

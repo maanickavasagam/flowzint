@@ -2,14 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  BarChart3,
-  Zap,
-  Home,
-  Users,
-  Sparkles,
-} from "lucide-react";
+import { LayoutDashboard, BarChart3, Home, Users, Sparkles } from "lucide-react";
+import { BrandMark, BrandWordmark } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -22,12 +16,8 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/[0.06] bg-background/60 px-4 py-6 md:flex">
       <Link href="/" className="mb-8 flex items-center gap-2 px-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet to-[hsl(280_90%_60%)] shadow-lg shadow-primary/40">
-          <Zap className="h-4.5 w-4.5 text-white" fill="currentColor" />
-        </span>
-        <span className="font-display text-lg font-bold tracking-tight">
-          Flow<span className="gradient-text">Zint</span>
-        </span>
+        <BrandMark />
+        <BrandWordmark className="text-lg" />
       </Link>
 
       <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">

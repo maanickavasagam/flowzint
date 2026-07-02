@@ -25,6 +25,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LeadBadge } from "@/components/shared/lead-badge";
+import { LeadDrawer } from "./LeadDrawer";
 import { cn, currency, formatDate, initials } from "@/lib/utils";
 import type { LeadTemperature } from "@/lib/types";
 
@@ -50,6 +51,7 @@ interface ContactRow {
 }
 interface OppRow {
   id: number;
+  lead_id: number;
   name: string;
   contact_company: string | null;
   stage: string;
@@ -59,6 +61,7 @@ interface OppRow {
 }
 interface MeetingRow {
   id: number;
+  lead_id: number | null;
   name: string;
   email: string;
   company: string | null;
@@ -107,6 +110,7 @@ export function CrmView({
 }) {
   const [query, setQuery] = React.useState("");
   const [sortDesc, setSortDesc] = React.useState(true);
+  const [openLeadId, setOpenLeadId] = React.useState<number | null>(null);
   const [temps, setTemps] = React.useState<Record<LeadTemperature, boolean>>({
     hot: true,
     warm: true,
@@ -162,6 +166,7 @@ export function CrmView({
   );
 
   return (
+    <>
     <Tabs defaultValue="leads" className="w-full">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <TabsList>
@@ -233,7 +238,7 @@ export function CrmView({
               </TableHeader>
               <TableBody>
                 {filteredLeads.map((l, i) => (
-                  <Row key={l.id} i={i}>
+                  <Row key={l.id} i={i} onClick={() => setOpenLeadId(l.id)}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
@@ -346,7 +351,7 @@ export function CrmView({
               </TableHeader>
               <TableBody>
                 {filteredOpps.map((o, i) => (
-                  <Row key={o.id} i={i}>
+                  <Row key={o.id} i={i} onClick={() => setOpenLeadId(o.lead_id)}>
                     <TableCell className="text-sm font-medium">{o.name}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {o.contact_company || "—"}
@@ -401,7 +406,13 @@ export function CrmView({
               </TableHeader>
               <TableBody>
                 {filteredMeetings.map((m, i) => (
-                  <Row key={m.id} i={i}>
+                  <Row
+                    key={m.id}
+                    i={i}
+                    onClick={
+                      m.lead_id != null ? () => setOpenLeadId(m.lead_id) : undefined
+                    }
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
@@ -441,6 +452,8 @@ export function CrmView({
         </Panel>
       </TabsContent>
     </Tabs>
+    <LeadDrawer leadId={openLeadId} onClose={() => setOpenLeadId(null)} />
+    </>
   );
 }
 
@@ -452,14 +465,24 @@ function Panel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Row({ children, i }: { children: React.ReactNode; i: number }) {
+function Row({
+  children,
+  i,
+  onClick,
+}: {
+  children: React.ReactNode;
+  i: number;
+  onClick?: () => void;
+}) {
   return (
     <motion.tr
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(i * 0.03, 0.3) }}
+      onClick={onClick}
       className={cn(
-        "border-b border-border/60 transition-colors hover:bg-white/[0.02]"
+        "border-b border-border/60 transition-colors hover:bg-white/[0.02]",
+        onClick && "cursor-pointer"
       )}
     >
       {children}
