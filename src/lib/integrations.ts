@@ -8,20 +8,65 @@
  *   N8N_WEBHOOK_URL                → fire events into an n8n workflow
  */
 
-export function emailEnabled(): boolean {
+function gmailEnabled(): boolean {
+  return Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD);
+}
+function resendEnabled(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM);
 }
+export function emailEnabled(): boolean {
+  return gmailEnabled() || resendEnabled();
+}
 
-/** Send an email via Resend's REST API. Returns true if actually sent. */
+/**
+ * Send an email. Prefers Gmail SMTP (sends to ANY recipient, no domain needed),
+ * falls back to Resend, and finally no-ops with a log. Returns true if sent.
+ */
 export async function sendEmail(input: {
   to: string;
   subject: string;
   html: string;
 }): Promise<boolean> {
-  if (!emailEnabled()) {
-    console.log(`[flowzint] (email mock) → ${input.to}: ${input.subject}`);
+  if (gmailEnabled()) return sendViaGmail(input);
+  if (resendEnabled()) return sendViaResend(input);
+  console.log(`[flowzint] (email mock) → ${input.to}: ${input.subject}`);
+  return false;
+}
+
+async function sendViaGmail(input: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<boolean> {
+  try {
+    const nodemailer = (await import("nodemailer")).default;
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+    const fromName = process.env.EMAIL_FROM_NAME || "FlowZint";
+    await transporter.sendMail({
+      from: `${fromName} <${process.env.GMAIL_USER}>`,
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+    });
+    console.log(`[flowzint] email sent (gmail) → ${input.to}`);
+    return true;
+  } catch (err) {
+    console.error("[flowzint] Gmail send failed", err);
     return false;
   }
+}
+
+async function sendViaResend(input: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<boolean> {
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -40,9 +85,10 @@ export async function sendEmail(input: {
       console.error("[flowzint] Resend error", res.status, await res.text());
       return false;
     }
+    console.log(`[flowzint] email sent (resend) → ${input.to}`);
     return true;
   } catch (err) {
-    console.error("[flowzint] sendEmail failed", err);
+    console.error("[flowzint] Resend send failed", err);
     return false;
   }
 }
