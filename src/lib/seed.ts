@@ -163,6 +163,9 @@ export function seedDatabase(force = false): { seeded: boolean } {
   const insertEvent = db.prepare(
     `INSERT INTO events (session_id, lead_id, type, meta, created_at) VALUES (?, ?, ?, ?, datetime('now', ?))`
   );
+  const insertEventAt = db.prepare(
+    `INSERT INTO events (session_id, lead_id, type, meta, created_at) VALUES (?, ?, ?, ?, datetime('now', ?, ?))`
+  );
   const insertNotif = db.prepare(
     `INSERT INTO slack_notifications (lead_id, session_id, channel, title, body, temperature, read, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', ?))`
@@ -239,7 +242,11 @@ export function seedDatabase(force = false): { seeded: boolean } {
       // Funnel events (respect ordering + our dedup semantics)
       insertEvent.run(sid, leadId, "chat_started", JSON.stringify({ page: p.page }), mod);
       if (rank >= 0) insertEvent.run(sid, leadId, "info_captured", null, mod);
-      if (rank >= 1) insertEvent.run(sid, leadId, "qualified", null, mod);
+      if (rank >= 1) {
+        // Qualified a couple of minutes into the chat — realistic duration.
+        const qmin = 2 + Math.floor(rand() * 5);
+        insertEventAt.run(sid, leadId, "qualified", null, mod, `+${qmin} minutes`);
+      }
       if (rank >= 2) insertEvent.run(sid, leadId, "demo_offered", null, mod);
 
       // Meeting + opportunity

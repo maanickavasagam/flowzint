@@ -180,34 +180,59 @@ export async function processTurn(input: {
   const flagged = (state.spamFlags ?? 0) >= 2;
   const temperature: LeadTemperature = flagged ? "cold" : breakdown.temperature;
 
-  // Persist contact + lead as soon as we have an email.
+  // Bounded email ask — if the visitor keeps skipping their email, route anyway
+  // (the booking / newsletter card collects it) instead of looping forever.
+  const missingField = nextMissingField(state)?.field;
+  if (!state.email && missingField === "email") {
+    state.emailAsks = (state.emailAsks ?? 0) + 1;
+  }
+  const forceRoute =
+    !state.email && missingField === "email" && (state.emailAsks ?? 0) >= 2;
+  const readyToRoute = isQualified(state) || forceRoute;
+
+  // Persist contact + lead once we have an email OR are ready to route.
   let contactId = session.contact_id ?? null;
   let leadId = session.lead_id ?? null;
 
-  if (state.email) {
-    const contact = upsertContact({
-      name: state.name,
-      email: state.email,
-      company: state.industry ? `${state.industry} Co.` : null,
-      industry: state.industry,
-      companySize: state.companySize,
-    });
-    contactId = contact.id;
+  if (state.email || readyToRoute) {
+    if (state.email) {
+      const contact = upsertContact({
+        name: state.name,
+        email: state.email,
+        company: null,
+        industry: state.industry,
+        companySize: state.companySize,
+      });
+      contactId = contact.id;
+    } else if (!contactId) {
+      // No email yet — create the contact once so the scored lead + transcript
+      // are still saved; email is filled in when they book / subscribe.
+      const contact = upsertContact({
+        name: state.name,
+        email: null,
+        company: null,
+        industry: state.industry,
+        companySize: state.companySize,
+      });
+      contactId = contact.id;
+    }
 
-    const status: LeadStatus = isQualified(state) ? "qualified" : "qualifying";
-    const lead = upsertLeadForSession({
-      contactId,
-      sessionId,
-      status,
-      score: breakdown.total,
-      temperature,
-      qualification: state,
-      breakdown: { ...breakdown, temperature },
-    });
-    leadId = lead.id;
+    if (contactId) {
+      const status: LeadStatus = readyToRoute ? "qualified" : "qualifying";
+      const lead = upsertLeadForSession({
+        contactId,
+        sessionId,
+        status,
+        score: breakdown.total,
+        temperature,
+        qualification: state,
+        breakdown: { ...breakdown, temperature },
+      });
+      leadId = lead.id;
 
-    if (state.name) {
-      logEvent({ sessionId, leadId, type: "info_captured" });
+      if (state.name) {
+        logEvent({ sessionId, leadId, type: "info_captured" });
+      }
     }
   }
 
@@ -224,7 +249,7 @@ export async function processTurn(input: {
   let reply = turn.reply;
   let options = currentOptions(state);
 
-  if (isQualified(state) && !alreadyRouted) {
+  if (readyToRoute && !alreadyRouted) {
     logEvent({ sessionId, leadId, type: "qualified" });
     reply = routingMessage(temperature, state.name);
     options = undefined;

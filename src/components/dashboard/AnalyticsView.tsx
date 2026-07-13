@@ -74,6 +74,14 @@ export function AnalyticsView({
   const top = funnel[0]?.count || 1;
   const chatTrend = trend.map((t) => t.chats);
   const meetTrend = trend.map((t) => t.meetings);
+  // Real week-over-week change from the last 14 days of activity.
+  const weekDelta = (arr: number[]): number => {
+    if (arr.length < 14) return 0;
+    const last = arr.slice(-7).reduce((a, b) => a + b, 0);
+    const prev = arr.slice(-14, -7).reduce((a, b) => a + b, 0);
+    if (prev === 0) return last > 0 ? 100 : 0;
+    return Math.round(((last - prev) / prev) * 100);
+  };
 
   return (
     <div className="space-y-6">
@@ -82,7 +90,7 @@ export function AnalyticsView({
         <KpiCard
           label="Total chats"
           value={String(kpis.totalChats)}
-          delta={14}
+          delta={weekDelta(chatTrend)}
           icon={MessageSquareText}
           trend={chatTrend}
           accent="hsl(263 90% 63%)"
@@ -90,7 +98,7 @@ export function AnalyticsView({
         <KpiCard
           label="Chat → meeting"
           value={pct(kpis.chatToMeeting, 1)}
-          delta={6}
+          delta={weekDelta(meetTrend)}
           icon={CalendarCheck}
           trend={meetTrend}
           accent="hsl(173 80% 45%)"
@@ -98,17 +106,13 @@ export function AnalyticsView({
         <KpiCard
           label="Chat → SQL"
           value={pct(kpis.chatToSql, 1)}
-          delta={8}
           icon={Target}
-          trend={[3, 4, 4, 5, 6, 7, 7, 8]}
           accent="hsl(38 92% 55%)"
         />
         <KpiCard
           label="Avg. qualification time"
           value={`${kpis.avgQualificationMinutes.toFixed(1)}m`}
-          delta={-11}
           icon={Timer}
-          trend={[6, 5, 5, 4, 4, 3, 4, 3]}
           accent="hsl(280 90% 60%)"
         />
       </div>
@@ -193,7 +197,7 @@ export function AnalyticsView({
                 </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="hsl(230 20% 30% / 0.2)"
+                  stroke="hsl(var(--border))"
                   vertical={false}
                 />
                 <XAxis
@@ -204,13 +208,13 @@ export function AnalyticsView({
                       day: "numeric",
                     })
                   }
-                  tick={{ fill: "hsl(220 12% 62%)", fontSize: 11 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
                   minTickGap={24}
                 />
                 <YAxis
-                  tick={{ fill: "hsl(220 12% 62%)", fontSize: 11 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
                   allowDecimals={false}
@@ -218,12 +222,14 @@ export function AnalyticsView({
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "hsl(230 28% 9%)",
-                    border: "1px solid hsl(230 20% 20%)",
+                    background: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
                     borderRadius: 12,
                     fontSize: 12,
+                    color: "hsl(var(--foreground))",
                   }}
-                  labelStyle={{ color: "hsl(220 20% 96%)" }}
+                  labelStyle={{ color: "hsl(var(--foreground))" }}
+                  itemStyle={{ color: "hsl(var(--foreground))" }}
                   labelFormatter={(d) =>
                     new Date(d as string).toLocaleDateString("en-US", {
                       weekday: "short",

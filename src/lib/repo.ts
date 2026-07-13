@@ -628,3 +628,43 @@ export function getChatTrend(): { date: string; chats: number; meetings: number 
   }
   return out;
 }
+
+/** Real 14-day daily series for the CRM KPI sparklines/deltas. */
+function fill14(rows: { d: string; n: number }[]): number[] {
+  const map = new Map(rows.map((r) => [r.d, r.n]));
+  const out: number[] = [];
+  for (let i = 13; i >= 0; i--) {
+    const dt = new Date();
+    dt.setDate(dt.getDate() - i);
+    out.push(map.get(dt.toISOString().slice(0, 10)) || 0);
+  }
+  return out;
+}
+
+export function getCrmSeries(): {
+  contacts: number[];
+  hotLeads: number[];
+  meetings: number[];
+  pipeline: number[];
+} {
+  const q = (sql: string) => fill14(db.prepare(sql).all() as { d: string; n: number }[]);
+  return {
+    contacts: q(
+      `SELECT date(created_at) d, COUNT(*) n FROM contacts
+       WHERE created_at >= date('now','-13 days') GROUP BY date(created_at)`
+    ),
+    hotLeads: q(
+      `SELECT date(created_at) d, COUNT(*) n FROM leads
+       WHERE temperature='hot' AND created_at >= date('now','-13 days')
+       GROUP BY date(created_at)`
+    ),
+    meetings: q(
+      `SELECT date(created_at) d, COUNT(*) n FROM meetings
+       WHERE created_at >= date('now','-13 days') GROUP BY date(created_at)`
+    ),
+    pipeline: q(
+      `SELECT date(created_at) d, COALESCE(SUM(amount),0) n FROM opportunities
+       WHERE created_at >= date('now','-13 days') GROUP BY date(created_at)`
+    ),
+  };
+}

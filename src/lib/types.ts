@@ -47,6 +47,8 @@ export interface QualificationState {
   objectionsRaised: string[];
   // Count of profane / nonsense messages — flags low-quality or troll sessions.
   spamFlags: number;
+  // How many times we've asked for an email without getting one (avoids a loop).
+  emailAsks?: number;
 }
 
 export interface ScoreBreakdown {

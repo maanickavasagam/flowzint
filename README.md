@@ -15,7 +15,7 @@ Next.js 14 · TypeScript · Tailwind · Framer Motion · SQLite · Anthropic Cla
 ## ✨ Highlights
 
 - **Conversational qualification** — an AI concierge ("Zia") asks one natural question at a time and maintains **structured state turn-by-turn** (never re-parsing the whole transcript).
-- **Deterministic scoring** — a pure function grades company size, budget, timeline and use-case fit on a transparent **0–11 rubric**. The LLM never guesses the score.
+- **Deterministic scoring** — a pure function grades company size, budget, timeline and use-case fit on a transparent **0–13 rubric**. The LLM never guesses the score.
 - **Smart routing** — Hot → instant booking + Slack alert; Warm → booking offer; Cold → nurture resource + newsletter capture.
 - **Objection handling** — "too expensive", "not ready", "need approval" and "just exploring" are detected mid-conversation and answered with canned rebuttals.
 - **Anti-troll moderation** — profanity/gibberish answers are rejected and re-prompted (rule-based, no key needed); repeat offenders are flagged and never alert sales.
@@ -95,10 +95,10 @@ flowchart TD
     C --> S[QualificationState<br/>maintained turn-by-turn]
     H --> S
 
-    S --> SC[scoreLead&#40;&#41;<br/>pure 0–11 rubric]
+    S --> SC[scoreLead&#40;&#41;<br/>pure 0–13 rubric]
     SC --> R{Route by temperature}
-    R -->|Hot 8–11| HOT[Booking + mock Slack alert + Opportunity]
-    R -->|Warm 5–7| WARM[Booking offer]
+    R -->|Hot 9–13| HOT[Booking + mock Slack alert + Opportunity]
+    R -->|Warm 5–8| WARM[Booking offer]
     R -->|Cold 0–4| COLD[Nurture resource + newsletter]
 
     O --> DB[(SQLite)]

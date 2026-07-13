@@ -24,7 +24,7 @@ const FEATURES = [
   {
     icon: Gauge,
     title: "Deterministic lead scoring",
-    body: "A transparent 0–11 rubric grades size, budget, timeline and fit. Cold, warm, hot — scored by logic, not vibes.",
+    body: "A transparent 0–13 rubric grades size, budget, timeline and fit. Cold, warm, hot — scored by logic, not vibes.",
   },
   {
     icon: CalendarCheck,

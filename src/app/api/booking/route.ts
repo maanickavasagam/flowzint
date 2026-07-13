@@ -22,7 +22,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { sessionId, name, email, slotIso, slotLabel } = body;
+    const { sessionId, name, email, company, slotIso, slotLabel } = body;
 
     if (!name || !email || !slotIso) {
       return NextResponse.json(
@@ -34,7 +34,11 @@ export async function POST(req: NextRequest) {
     const session = sessionId ? getSession(sessionId) : undefined;
 
     // Ensure a contact exists even for direct (non-chat) bookings.
-    const contact = upsertContact({ name, email });
+    const contact = upsertContact({
+      name,
+      email,
+      company: company?.trim() || null,
+    });
     const contactId = session?.contact_id ?? contact.id;
     const leadId = session?.lead_id ?? null;
 

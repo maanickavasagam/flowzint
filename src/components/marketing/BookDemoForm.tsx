@@ -52,6 +52,7 @@ export function BookDemoForm() {
           sessionId: sid || undefined,
           name,
           email,
+          company,
           slotIso: selected.iso,
           slotLabel: selected.label,
         }),

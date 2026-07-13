@@ -15,6 +15,7 @@ export const EMPTY_STATE: QualificationState = {
   currentTools: null,
   objectionsRaised: [],
   spamFlags: 0,
+  emailAsks: 0,
 };
 
 /** Product context injected into the system prompt so Claude stays on-message. */
@@ -164,8 +165,12 @@ export function quickRepliesFor(
 /*  Moderation — reject profane / nonsense answers (rule-based, no LLM needed).*/
 /* -------------------------------------------------------------------------- */
 
-const PROFANITY = [
+// Single words are matched on word boundaries so legitimate names/words that
+// merely *contain* these substrings (Dickson, Hancock, classic, assess…) are
+// never flagged. Phrases are matched loosely.
+const PROFANITY_WORDS = [
   "fuck",
+  "fucking",
   "shit",
   "bitch",
   "dick",
@@ -176,13 +181,13 @@ const PROFANITY = [
   "cunt",
   "slut",
   "whore",
-  "suck my",
-  "screw you",
-  "piss off",
   "faggot",
   "nigger",
   "retard",
+  "wtf",
 ];
+const PROFANITY_PHRASES = ["suck my", "screw you", "piss off", "fuck you"];
+const PROFANITY_RE = new RegExp(`\\b(${PROFANITY_WORDS.join("|")})\\b`, "i");
 
 export type ModerationReason = "profane" | "gibberish" | null;
 
@@ -199,7 +204,7 @@ export function moderateMessage(text: string): ModerationResult {
   const raw = text.trim();
   const t = raw.toLowerCase();
 
-  if (PROFANITY.some((w) => t.includes(w))) {
+  if (PROFANITY_RE.test(t) || PROFANITY_PHRASES.some((p) => t.includes(p))) {
     return { blocked: true, reason: "profane" };
   }
 

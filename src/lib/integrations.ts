@@ -40,12 +40,19 @@ async function sendViaGmail(input: {
 }): Promise<boolean> {
   try {
     const nodemailer = (await import("nodemailer")).default;
+    // Some local networks (antivirus / corporate proxies) intercept TLS, which
+    // breaks cert verification. EMAIL_TLS_INSECURE=true relaxes it for this one
+    // connection. Leave it unset in any real deployment.
+    const insecureTls = process.env.EMAIL_TLS_INSECURE === "true";
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
+        pass: (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, ""),
       },
+      ...(insecureTls ? { tls: { rejectUnauthorized: false } } : {}),
     });
     const fromName = process.env.EMAIL_FROM_NAME || "FlowZint";
     await transporter.sendMail({
