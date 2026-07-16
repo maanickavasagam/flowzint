@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: foyer
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: FLOWZINT_DB_PATH
+        value: /opt/render/project/src/data/foyer.db
+      # Set these in the Render dashboard (Environment tab) — do not commit
+      # real values to this file:
+      #   GROQ_API_KEY
+      #   GROQ_MODEL          (optional, defaults to llama-3.3-70b-versatile)
+      #   GMAIL_USER
+      #   GMAIL_APP_PASSWORD
+      #   EMAIL_FROM_NAME
