@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    if (!/^[\w.+-]+@[\w-]+\.[\w.-]{2,}$/.test(String(email).trim())) {
+      return NextResponse.json(
+        { error: "That email doesn't look right — mind checking it?" },
+        { status: 400 }
+      );
+    }
 
     const session = sessionId ? getSession(sessionId) : undefined;
 
