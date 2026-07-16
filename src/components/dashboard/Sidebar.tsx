@@ -2,13 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BarChart3, Home, Users, Sparkles } from "lucide-react";
+import {
+  LayoutDashboard,
+  BarChart3,
+  Home,
+  Users,
+  Sparkles,
+  SlidersHorizontal,
+} from "lucide-react";
 import { BrandMark, BrandWordmark } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/crm", label: "CRM", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/rubric", label: "Scoring rubric", icon: SlidersHorizontal },
 ];
 
 export function Sidebar() {

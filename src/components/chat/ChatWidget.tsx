@@ -14,9 +14,11 @@ import {
   Maximize2,
   Minimize2,
   ChevronDown,
+  Mic,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useSpeechInput } from "./useSpeechInput";
 import { cn } from "@/lib/utils";
 import type { BookingSlot } from "@/lib/types";
 
@@ -56,6 +58,9 @@ export function ChatWidget({
   const [sessionId, setSessionId] = React.useState<string>("");
   const [unread, setUnread] = React.useState(0);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  // Browser-native voice input — dictates straight into the composer.
+  const { listening, supported: micSupported, toggle: toggleMic } =
+    useSpeechInput((text) => setInput(text));
 
   // Load / persist session id.
   React.useEffect(() => {
@@ -349,10 +354,33 @@ export function ChatWidget({
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message…"
+                placeholder={listening ? "Listening…" : "Type your message…"}
                 className="h-11 rounded-full bg-secondary/60"
                 disabled={typing}
               />
+              {micSupported && (
+                <button
+                  type="button"
+                  onClick={toggleMic}
+                  aria-label={listening ? "Stop dictation" : "Speak"}
+                  title={listening ? "Stop dictation" : "Speak"}
+                  className={cn(
+                    "relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-colors",
+                    listening
+                      ? "border-hot/40 bg-hot/15 text-hot"
+                      : "border-border bg-secondary/60 text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Mic className="h-4 w-4" />
+                  {listening && (
+                    <motion.span
+                      className="absolute inset-0 rounded-full ring-2 ring-hot/50"
+                      animate={{ opacity: [0.8, 0.2, 0.8], scale: [1, 1.12, 1] }}
+                      transition={{ duration: 1.4, repeat: Infinity }}
+                    />
+                  )}
+                </button>
+              )}
               <Button
                 type="submit"
                 size="icon"

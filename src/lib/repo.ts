@@ -1,5 +1,8 @@
 import { db } from "./db";
+import { DEFAULT_WEIGHTS, scoreLead } from "./scoring";
+import { FIELD_QUESTIONS, EMPTY_STATE } from "./conversation";
 import type {
+  ScoringWeights,
   Contact,
   Lead,
   Opportunity,
@@ -156,11 +159,127 @@ export function listLeads(): LeadWithContact[] {
     .all() as LeadWithContact[];
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Scoring rubric (tunable, live)                                             */
+/* -------------------------------------------------------------------------- */
+
+const RUBRIC_KEY = "scoring_weights";
+
+export function getScoringWeights(): ScoringWeights {
+  const row = db
+    .prepare("SELECT value FROM app_settings WHERE key = ?")
+    .get(RUBRIC_KEY) as { value: string } | undefined;
+  if (!row) return DEFAULT_WEIGHTS;
+  try {
+    // Merge over defaults so a partial/older stored rubric still works.
+    const parsed = JSON.parse(row.value) as Partial<ScoringWeights>;
+    return { ...DEFAULT_WEIGHTS, ...parsed };
+  } catch {
+    return DEFAULT_WEIGHTS;
+  }
+}
+
+export function saveScoringWeights(w: ScoringWeights): void {
+  db.prepare(
+    `INSERT INTO app_settings (key, value, updated_at)
+     VALUES (?, ?, datetime('now'))
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')`
+  ).run(RUBRIC_KEY, JSON.stringify(w));
+}
+
+export function resetScoringWeights(): void {
+  db.prepare("DELETE FROM app_settings WHERE key = ?").run(RUBRIC_KEY);
+}
+
+export interface RescoreSummary {
+  total: number;
+  changed: number;
+  transitions: { from: LeadTemperature; to: LeadTemperature; count: number }[];
+  distribution: Record<LeadTemperature, number>;
+}
+
+/**
+ * Re-score every stored lead against a rubric. Runs in one transaction so the
+ * dashboard reflects the new rubric the moment the request returns.
+ */
+export function rescoreAllLeads(w: ScoringWeights): RescoreSummary {
+  const leads = db
+    .prepare("SELECT id, temperature, score, qualification FROM leads")
+    .all() as {
+    id: number;
+    temperature: LeadTemperature;
+    score: number;
+    qualification: string;
+  }[];
+
+  const update = db.prepare(
+    `UPDATE leads SET score = ?, temperature = ?, score_breakdown = ?,
+       updated_at = datetime('now') WHERE id = ?`
+  );
+  const syncSession = db.prepare(
+    "UPDATE chat_sessions SET score = ?, temperature = ? WHERE lead_id = ?"
+  );
+
+  const transitionMap = new Map<string, number>();
+  const distribution: Record<LeadTemperature, number> = {
+    cold: 0,
+    warm: 0,
+    hot: 0,
+  };
+  let changed = 0;
+
+  const run = db.transaction(() => {
+    for (const lead of leads) {
+      let state;
+      try {
+        state = { ...EMPTY_STATE, ...JSON.parse(lead.qualification) };
+      } catch {
+        state = { ...EMPTY_STATE };
+      }
+      const breakdown = scoreLead(state, w);
+      // Troll-flagged sessions stay capped at cold regardless of rubric.
+      const flagged = (state.spamFlags ?? 0) >= 2;
+      const temperature: LeadTemperature = flagged
+        ? "cold"
+        : breakdown.temperature;
+
+      distribution[temperature]++;
+
+      if (temperature !== lead.temperature || breakdown.total !== lead.score) {
+        changed++;
+        if (temperature !== lead.temperature) {
+          const key = `${lead.temperature}->${temperature}`;
+          transitionMap.set(key, (transitionMap.get(key) || 0) + 1);
+        }
+      }
+
+      update.run(
+        breakdown.total,
+        temperature,
+        JSON.stringify({ ...breakdown, temperature }),
+        lead.id
+      );
+      syncSession.run(breakdown.total, temperature, lead.id);
+    }
+  });
+  run();
+
+  const transitions = Array.from(transitionMap.entries())
+    .map(([k, count]) => {
+      const [from, to] = k.split("->") as [LeadTemperature, LeadTemperature];
+      return { from, to, count };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  return { total: leads.length, changed, transitions, distribution };
+}
+
 export interface LeadDetail {
   lead: LeadWithContact;
   messages: ChatMessageDTO[];
   qualification: QualificationState;
   breakdown: ScoreBreakdown;
+  weights: ScoringWeights;
 }
 
 export function getLeadDetail(leadId: number): LeadDetail | null {
@@ -189,7 +308,126 @@ export function getLeadDetail(leadId: number): LeadDetail | null {
     breakdown = {} as ScoreBreakdown;
   }
 
-  return { lead, messages, qualification, breakdown };
+  return { lead, messages, qualification, breakdown, weights: getScoringWeights() };
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Conversation intelligence — objections & drop-off                          */
+/* -------------------------------------------------------------------------- */
+
+const OBJECTION_LABELS: Record<string, string> = {
+  too_expensive: "Too expensive",
+  not_ready: "Not ready yet",
+  need_approval: "Needs approval",
+  just_exploring: "Just exploring",
+};
+
+export interface ObjectionStat {
+  key: string;
+  label: string;
+  raised: number;
+  booked: number;
+  lost: number;
+  bookedRate: number;
+}
+
+/**
+ * Which objections show up, and how often the visitor still booked afterwards.
+ * Turns raw chat into "this objection is costing us pipeline".
+ */
+export function getObjectionStats(): ObjectionStat[] {
+  const rows = db
+    .prepare(
+      `SELECT e.session_id AS sid, e.meta AS meta,
+              EXISTS(SELECT 1 FROM events b
+                     WHERE b.session_id = e.session_id
+                       AND b.type = 'meeting_booked') AS booked
+       FROM events e
+       WHERE e.type = 'objection_handled'`
+    )
+    .all() as { sid: string; meta: string | null; booked: number }[];
+
+  const agg = new Map<string, { raised: number; booked: number }>();
+  for (const r of rows) {
+    let key = "unknown";
+    try {
+      key = JSON.parse(r.meta || "{}").objection || "unknown";
+    } catch {
+      /* ignore */
+    }
+    const cur = agg.get(key) || { raised: 0, booked: 0 };
+    cur.raised++;
+    if (r.booked) cur.booked++;
+    agg.set(key, cur);
+  }
+
+  return Array.from(agg.entries())
+    .map(([key, v]) => ({
+      key,
+      label: OBJECTION_LABELS[key] || key,
+      raised: v.raised,
+      booked: v.booked,
+      lost: v.raised - v.booked,
+      bookedRate: v.raised ? v.booked / v.raised : 0,
+    }))
+    .sort((a, b) => b.raised - a.raised);
+}
+
+export interface DropOffStat {
+  field: string;
+  label: string;
+  stalled: number;
+  pct: number;
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  industry: "Industry",
+  companySizeBucket: "Team size",
+  useCaseMatch: "Use case",
+  timelineBucket: "Timeline",
+  budgetLevel: "Budget",
+  email: "Email",
+};
+
+/**
+ * Where unfinished conversations stall — the first question the visitor never
+ * answered. Shows which question is bleeding the funnel.
+ */
+export function getDropOffStats(): DropOffStat[] {
+  const rows = db
+    .prepare(
+      `SELECT qualification FROM chat_sessions
+       WHERE status = 'active'`
+    )
+    .all() as { qualification: string }[];
+
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    let state: QualificationState;
+    try {
+      state = { ...EMPTY_STATE, ...JSON.parse(r.qualification) };
+    } catch {
+      state = { ...EMPTY_STATE };
+    }
+    const missing = FIELD_QUESTIONS.find((q) => !state[q.field]);
+    if (!missing) continue;
+    const k = String(missing.field);
+    counts.set(k, (counts.get(k) || 0) + 1);
+  }
+
+  const total = Array.from(counts.values()).reduce((a, b) => a + b, 0);
+  // Keep the canonical question order so the chart reads like the funnel.
+  return FIELD_QUESTIONS.map((q) => {
+    const k = String(q.field);
+    const stalled = counts.get(k) || 0;
+    return {
+      field: k,
+      label: FIELD_LABELS[k] || k,
+      stalled,
+      pct: total ? stalled / total : 0,
+    };
+  }).filter((d) => d.stalled > 0);
 }
 
 /* -------------------------------------------------------------------------- */

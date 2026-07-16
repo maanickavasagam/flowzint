@@ -26,6 +26,7 @@ import {
   createOpportunity,
   createNotification,
   logEvent,
+  getScoringWeights,
 } from "./repo";
 import { notifyHotLead } from "./integrations";
 import type { QualificationState, LeadTemperature, LeadStatus } from "./types";
@@ -174,8 +175,8 @@ export async function processTurn(input: {
     });
   }
 
-  // Score with the pure function — never the LLM.
-  const breakdown = scoreLead(state);
+  // Score with the pure function against the live (tunable) rubric — never the LLM.
+  const breakdown = scoreLead(state, getScoringWeights());
   // Flagged (troll) sessions are capped to cold so they never alert sales.
   const flagged = (state.spamFlags ?? 0) >= 2;
   const temperature: LeadTemperature = flagged ? "cold" : breakdown.temperature;

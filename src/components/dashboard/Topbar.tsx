@@ -15,6 +15,10 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
     title: "Analytics",
     subtitle: "How visitors move from first hello to closed opportunity.",
   },
+  "/rubric": {
+    title: "Scoring rubric",
+    subtitle: "Tune how leads are scored — every lead re-scores instantly.",
+  },
 };
 
 export function Topbar() {

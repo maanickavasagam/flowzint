@@ -6,13 +6,14 @@ import { X, Sparkles, AlertTriangle, MessageSquareText } from "lucide-react";
 import { LeadBadge } from "@/components/shared/lead-badge";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SCORE_DIMENSIONS, MAX_SCORE } from "@/lib/scoring";
+import { dimensionsFor, maxScoreFor, DEFAULT_WEIGHTS } from "@/lib/scoring";
 import { cn, formatDateTime } from "@/lib/utils";
 import type {
   ChatMessageDTO,
   QualificationState,
   ScoreBreakdown,
   LeadTemperature,
+  ScoringWeights,
 } from "@/lib/types";
 
 interface Detail {
@@ -29,6 +30,7 @@ interface Detail {
   messages: ChatMessageDTO[];
   qualification: QualificationState;
   breakdown: ScoreBreakdown;
+  weights: ScoringWeights;
 }
 
 const ANSWER_FIELDS: { key: keyof QualificationState; label: string }[] = [
@@ -64,6 +66,10 @@ export function LeadDrawer({
 
   const open = leadId != null;
   const spam = detail?.qualification?.spamFlags ?? 0;
+  // Breakdown maxima follow whatever rubric is currently live.
+  const weights = detail?.weights ?? DEFAULT_WEIGHTS;
+  const dimensions = dimensionsFor(weights);
+  const maxScore = maxScoreFor(weights);
 
   return (
     <AnimatePresence>
@@ -120,6 +126,7 @@ export function LeadDrawer({
                       <LeadBadge
                         temperature={detail.lead.temperature}
                         score={detail.lead.score}
+                        max={maxScore}
                       />
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -143,11 +150,11 @@ export function LeadDrawer({
                       <p className="text-sm font-semibold">Why this score</p>
                       <span className="text-sm font-bold">
                         {detail.breakdown.total ?? detail.lead.score}
-                        <span className="text-muted-foreground">/{MAX_SCORE}</span>
+                        <span className="text-muted-foreground">/{maxScore}</span>
                       </span>
                     </div>
                     <div className="space-y-3">
-                      {SCORE_DIMENSIONS.map((d) => {
+                      {dimensions.map((d) => {
                         const pts = (detail.breakdown[d.key] as number) ?? 0;
                         return (
                           <div key={d.key}>

@@ -126,6 +126,12 @@ function migrate(db: Database.Database) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_leads_contact ON leads(contact_id);
     CREATE INDEX IF NOT EXISTS idx_leads_session ON leads(session_id);
     CREATE INDEX IF NOT EXISTS idx_messages_session ON chat_messages(session_id);

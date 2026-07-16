@@ -65,11 +65,14 @@ export function AnalyticsView({
   kpis,
   trend,
   recent,
+  maxScore,
 }: {
   funnel: FunnelStage[];
   kpis: Kpis;
   trend: { date: string; chats: number; meetings: number }[];
   recent: RecentSession[];
+  /** Max attainable score for the live rubric. */
+  maxScore?: number;
 }) {
   const top = funnel[0]?.count || 1;
   const chatTrend = trend.map((t) => t.chats);
@@ -303,6 +306,7 @@ export function AnalyticsView({
                   <LeadBadge
                     temperature={s.temperature}
                     score={s.score ?? undefined}
+                    max={maxScore}
                   />
                 ) : (
                   <Badge variant="secondary">Unscored</Badge>

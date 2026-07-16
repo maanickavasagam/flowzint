@@ -2,29 +2,67 @@ import type {
   QualificationState,
   ScoreBreakdown,
   LeadTemperature,
+  ScoringWeights,
 } from "./types";
 
 /**
  * Pure, deterministic lead scoring — NEVER guessed by the LLM.
  *
- * Intent-first rubric (0–13). Buying intent (budget + timeline + use-case fit)
- * dominates; company size is only a small modifier so a small-but-serious,
+ * The rubric is *configurable*: weights and thresholds live in the database and
+ * can be tuned live from the dashboard, after which every existing lead is
+ * re-scored with the new rubric. Scoring itself stays a pure function of
+ * (state, weights), so it remains deterministic and auditable.
+ *
+ * Intent-first by default: buying intent (budget + timeline + use-case fit)
+ * dominates, and company size is only a small modifier — so a small-but-serious,
  * well-funded, urgent buyer is never misclassified as cold.
- *
- *   Budget:        at/above tier = 4 | vague = 2 | below = 0        (max 4)
- *   Timeline:      <1mo = 4 | 1–3mo = 2 | 3mo+/exploring = 1        (max 4)
- *   Use-case fit:  clear match = 3 | vague = 1                      (max 3)
- *   Company size:  500+ = 2 | 51–500 = 1 | 1–50 = 0  (modifier)     (max 2)
- *
- * Temperature:  0–4 Cold | 5–8 Warm | 9–13 Hot
  */
-export const MAX_SCORE = 13;
+export const DEFAULT_WEIGHTS: ScoringWeights = {
+  budget: { at_or_above: 4, vague: 2, below: 0 },
+  timeline: { "<1mo": 4, "1-3mo": 2, "3mo+": 1 },
+  useCase: { match: 3, vague: 1 },
+  companySize: { "500+": 2, "51-500": 1, "1-50": 0 },
+  thresholds: { hot: 9, warm: 5 },
+};
 
-export function scoreLead(state: QualificationState): ScoreBreakdown {
-  const budget = scoreBudget(state.budgetLevel);
-  const timeline = scoreTimeline(state.timelineBucket);
-  const useCase = scoreUseCase(state.useCaseMatch);
-  const companySize = scoreCompanySize(state.companySizeBucket);
+/** Highest attainable total for a given rubric. */
+export function maxScoreFor(w: ScoringWeights = DEFAULT_WEIGHTS): number {
+  const best = (o: Record<string, number>) => Math.max(0, ...Object.values(o));
+  return (
+    best(w.budget) + best(w.timeline) + best(w.useCase) + best(w.companySize)
+  );
+}
+
+/** Per-dimension labels + maxima, used by the CRM breakdown UI. */
+export function dimensionsFor(w: ScoringWeights = DEFAULT_WEIGHTS): {
+  key: keyof Pick<
+    ScoreBreakdown,
+    "budget" | "timeline" | "useCase" | "companySize"
+  >;
+  label: string;
+  max: number;
+}[] {
+  const best = (o: Record<string, number>) => Math.max(0, ...Object.values(o));
+  return [
+    { key: "budget", label: "Budget", max: best(w.budget) },
+    { key: "timeline", label: "Timeline", max: best(w.timeline) },
+    { key: "useCase", label: "Use-case fit", max: best(w.useCase) },
+    { key: "companySize", label: "Company size", max: best(w.companySize) },
+  ];
+}
+
+export function scoreLead(
+  state: QualificationState,
+  w: ScoringWeights = DEFAULT_WEIGHTS
+): ScoreBreakdown {
+  const budget = state.budgetLevel ? (w.budget[state.budgetLevel] ?? 0) : 0;
+  const timeline = state.timelineBucket
+    ? (w.timeline[state.timelineBucket] ?? 0)
+    : 0;
+  const useCase = state.useCaseMatch ? (w.useCase[state.useCaseMatch] ?? 0) : 0;
+  const companySize = state.companySizeBucket
+    ? (w.companySize[state.companySizeBucket] ?? 0)
+    : 0;
 
   const total = budget + timeline + useCase + companySize;
 
@@ -34,88 +72,18 @@ export function scoreLead(state: QualificationState): ScoreBreakdown {
     timeline,
     useCase,
     total,
-    temperature: temperatureFor(total),
+    temperature: temperatureFor(total, w),
   };
 }
 
-export function scoreCompanySize(
-  bucket: QualificationState["companySizeBucket"]
-): number {
-  switch (bucket) {
-    case "500+":
-      return 2;
-    case "51-500":
-      return 1;
-    case "1-50":
-      return 0;
-    default:
-      return 0;
-  }
-}
-
-export function scoreBudget(
-  level: QualificationState["budgetLevel"]
-): number {
-  switch (level) {
-    case "at_or_above":
-      return 4;
-    case "vague":
-      return 2;
-    case "below":
-      return 0;
-    default:
-      return 0;
-  }
-}
-
-export function scoreTimeline(
-  bucket: QualificationState["timelineBucket"]
-): number {
-  switch (bucket) {
-    case "<1mo":
-      return 4;
-    case "1-3mo":
-      return 2;
-    case "3mo+":
-      return 1;
-    default:
-      return 0;
-  }
-}
-
-export function scoreUseCase(
-  match: QualificationState["useCaseMatch"]
-): number {
-  switch (match) {
-    case "match":
-      return 3;
-    case "vague":
-      return 1;
-    default:
-      return 0;
-  }
-}
-
-export function temperatureFor(total: number): LeadTemperature {
-  if (total >= 9) return "hot";
-  if (total >= 5) return "warm";
+export function temperatureFor(
+  total: number,
+  w: ScoringWeights = DEFAULT_WEIGHTS
+): LeadTemperature {
+  if (total >= w.thresholds.hot) return "hot";
+  if (total >= w.thresholds.warm) return "warm";
   return "cold";
 }
-
-/** Human-readable labels for each scoring dimension (used in the CRM breakdown). */
-export const SCORE_DIMENSIONS: {
-  key: keyof Pick<
-    ScoreBreakdown,
-    "budget" | "timeline" | "useCase" | "companySize"
-  >;
-  label: string;
-  max: number;
-}[] = [
-  { key: "budget", label: "Budget", max: 4 },
-  { key: "timeline", label: "Timeline", max: 4 },
-  { key: "useCase", label: "Use-case fit", max: 3 },
-  { key: "companySize", label: "Company size", max: 2 },
-];
 
 /**
  * How many of the four qualifying dimensions have we captured? Used to decide
@@ -134,8 +102,6 @@ export function isQualified(state: QualificationState): boolean {
   // We consider a lead "qualified" once we have identity + at least 3 of the
   // 4 scoring dimensions captured.
   return (
-    !!state.email &&
-    !!state.name &&
-    qualificationCompleteness(state) >= 3
+    !!state.email && !!state.name && qualificationCompleteness(state) >= 3
   );
 }

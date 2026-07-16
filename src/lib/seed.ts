@@ -36,32 +36,34 @@ interface Persona {
     | "meeting_booked"
     | "opportunity_created";
   daysAgo: number;
+  /** Objection raised mid-conversation, if any — drives objection analytics. */
+  objection?: "too_expensive" | "not_ready" | "need_approval" | "just_exploring";
 }
 
 const PERSONAS: Persona[] = [
   // Hot, booked
-  { name: "Priya Raman", email: "priya@latchpoint.io", company: "Latchpoint", industry: "B2B SaaS", size: "51-500", sizePhrase: "about 240 people", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/pricing", reached: "opportunity_created", daysAgo: 1 },
-  { name: "Marcus Bell", email: "marcus@cindershift.com", company: "Cindershift", industry: "Fintech", size: "500+", sizePhrase: "around 900", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/book-demo", reached: "opportunity_created", daysAgo: 2 },
+  { name: "Priya Raman", email: "priya@latchpoint.io", company: "Latchpoint", industry: "B2B SaaS", size: "51-500", sizePhrase: "about 240 people", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/pricing", reached: "opportunity_created", objection: "too_expensive", daysAgo: 1 },
+  { name: "Marcus Bell", email: "marcus@cindershift.com", company: "Cindershift", industry: "Fintech", size: "500+", sizePhrase: "around 900", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/book-demo", reached: "opportunity_created", objection: "need_approval", daysAgo: 2 },
   { name: "Dana Okonkwo", email: "dana@northwindlabs.com", company: "Northwind Labs", industry: "Marketing agency", size: "51-500", sizePhrase: "roughly 120", budget: "at_or_above", timeline: "1-3mo", useCase: "match", page: "/pricing", reached: "opportunity_created", daysAgo: 3 },
   { name: "Ethan Cole", email: "ethan@verdant.co", company: "Verdant", industry: "Climate tech", size: "500+", sizePhrase: "1,200+", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/book-demo", reached: "meeting_booked", daysAgo: 4 },
-  { name: "Sofia Marin", email: "sofia@kwiklane.com", company: "Kwiklane", industry: "Logistics", size: "51-500", sizePhrase: "about 300", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/pricing", reached: "meeting_booked", daysAgo: 5 },
+  { name: "Sofia Marin", email: "sofia@kwiklane.com", company: "Kwiklane", industry: "Logistics", size: "51-500", sizePhrase: "about 300", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/pricing", reached: "meeting_booked", objection: "too_expensive", daysAgo: 5 },
   // Hot, demo offered (not yet booked)
-  { name: "Liam Fraser", email: "liam@ortus.ai", company: "Ortus AI", industry: "AI tooling", size: "51-500", sizePhrase: "~180", budget: "at_or_above", timeline: "1-3mo", useCase: "match", page: "/pricing", reached: "demo_offered", daysAgo: 2 },
-  { name: "Ava Nguyen", email: "ava@brightpeak.io", company: "BrightPeak", industry: "HR software", size: "500+", sizePhrase: "800 people", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/book-demo", reached: "demo_offered", daysAgo: 6 },
+  { name: "Liam Fraser", email: "liam@ortus.ai", company: "Ortus AI", industry: "AI tooling", size: "51-500", sizePhrase: "~180", budget: "at_or_above", timeline: "1-3mo", useCase: "match", page: "/pricing", reached: "demo_offered", objection: "too_expensive", daysAgo: 2 },
+  { name: "Ava Nguyen", email: "ava@brightpeak.io", company: "BrightPeak", industry: "HR software", size: "500+", sizePhrase: "800 people", budget: "at_or_above", timeline: "<1mo", useCase: "match", page: "/book-demo", reached: "demo_offered", objection: "need_approval", daysAgo: 6 },
   // Warm, booked
   { name: "Noah Whitfield", email: "noah@stackforge.dev", company: "StackForge", industry: "DevTools", size: "1-50", sizePhrase: "about 30", budget: "at_or_above", timeline: "1-3mo", useCase: "match", page: "/pricing", reached: "meeting_booked", daysAgo: 7 },
   { name: "Isabella Reyes", email: "isabella@peppercloud.com", company: "PepperCloud", industry: "E-commerce", size: "51-500", sizePhrase: "around 90", budget: "vague", timeline: "1-3mo", useCase: "match", page: "/book-demo", reached: "meeting_booked", daysAgo: 8 },
   // Warm, demo offered
-  { name: "Oliver Grant", email: "oliver@finchart.io", company: "FinChart", industry: "Fintech", size: "1-50", sizePhrase: "a team of 20", budget: "vague", timeline: "1-3mo", useCase: "match", page: "/pricing", reached: "demo_offered", daysAgo: 4 },
-  { name: "Mia Sørensen", email: "mia@glintco.com", company: "Glint", industry: "Design SaaS", size: "51-500", sizePhrase: "~140", budget: "vague", timeline: "3mo+", useCase: "match", page: "/book-demo", reached: "demo_offered", daysAgo: 9 },
-  { name: "James Park", email: "james@routehub.com", company: "RouteHub", industry: "Logistics", size: "1-50", sizePhrase: "12 of us", budget: "at_or_above", timeline: "1-3mo", useCase: "match", page: "/pricing", reached: "qualified", daysAgo: 5 },
+  { name: "Oliver Grant", email: "oliver@finchart.io", company: "FinChart", industry: "Fintech", size: "1-50", sizePhrase: "a team of 20", budget: "vague", timeline: "1-3mo", useCase: "match", page: "/pricing", reached: "demo_offered", objection: "not_ready", daysAgo: 4 },
+  { name: "Mia Sørensen", email: "mia@glintco.com", company: "Glint", industry: "Design SaaS", size: "51-500", sizePhrase: "~140", budget: "vague", timeline: "3mo+", useCase: "match", page: "/book-demo", reached: "demo_offered", objection: "just_exploring", daysAgo: 9 },
+  { name: "James Park", email: "james@routehub.com", company: "RouteHub", industry: "Logistics", size: "1-50", sizePhrase: "12 of us", budget: "at_or_above", timeline: "1-3mo", useCase: "match", page: "/pricing", reached: "qualified", objection: "too_expensive", daysAgo: 5 },
   // Cold / nurture
-  { name: "Chloe Adams", email: "chloe@tinkergarden.com", company: "TinkerGarden", industry: "Education", size: "1-50", sizePhrase: "just me and a cofounder", budget: "below", timeline: "3mo+", useCase: "vague", page: "/", reached: "qualified", daysAgo: 6 },
-  { name: "Ben Carter", email: "ben@quillstack.com", company: "Quillstack", industry: "Consulting", size: "1-50", sizePhrase: "about 8", budget: "vague", timeline: "3mo+", useCase: "vague", page: "/pricing", reached: "qualified", daysAgo: 10 },
+  { name: "Chloe Adams", email: "chloe@tinkergarden.com", company: "TinkerGarden", industry: "Education", size: "1-50", sizePhrase: "just me and a cofounder", budget: "below", timeline: "3mo+", useCase: "vague", page: "/", reached: "qualified", objection: "not_ready", daysAgo: 6 },
+  { name: "Ben Carter", email: "ben@quillstack.com", company: "Quillstack", industry: "Consulting", size: "1-50", sizePhrase: "about 8", budget: "vague", timeline: "3mo+", useCase: "vague", page: "/pricing", reached: "qualified", objection: "just_exploring", daysAgo: 10 },
   { name: "Grace Liu", email: "grace@moonlit.studio", company: "Moonlit Studio", industry: "Creative agency", size: "1-50", sizePhrase: "5 person studio", budget: "below", timeline: "3mo+", useCase: "match", page: "/", reached: "info_captured", daysAgo: 11 },
   { name: "Daniel Weiss", email: "daniel@harborline.co", company: "Harborline", industry: "Real estate", size: "51-500", sizePhrase: "around 70", budget: "vague", timeline: "3mo+", useCase: "vague", page: "/book-demo", reached: "info_captured", daysAgo: 12 },
   { name: "Zoe Martins", email: "zoe@brambly.com", company: "Brambly", industry: "Retail", size: "1-50", sizePhrase: "15ish", budget: "below", timeline: "3mo+", useCase: "vague", page: "/pricing", reached: "info_captured", daysAgo: 8 },
-  { name: "Aarav Shah", email: "aarav@nimbus.works", company: "Nimbus Works", industry: "SaaS", size: "51-500", sizePhrase: "~110", budget: "vague", timeline: "1-3mo", useCase: "match", page: "/book-demo", reached: "qualified", daysAgo: 3 },
+  { name: "Aarav Shah", email: "aarav@nimbus.works", company: "Nimbus Works", industry: "SaaS", size: "51-500", sizePhrase: "~110", budget: "vague", timeline: "1-3mo", useCase: "match", page: "/book-demo", reached: "qualified", objection: "need_approval", daysAgo: 3 },
 ];
 
 const FUTURE_SLOT_TIMES = ["10:00 AM", "11:30 AM", "2:00 PM", "3:30 PM"];
@@ -101,7 +103,7 @@ function buildQualification(p: Persona): QualificationState {
     timeline: p.timeline === "<1mo" ? "ASAP" : p.timeline === "1-3mo" ? "next couple months" : "just exploring",
     timelineBucket: p.timeline,
     currentTools: pick(["HubSpot", "Intercom + spreadsheets", "Drift", "nothing yet", "Salesforce"]),
-    objectionsRaised: [],
+    objectionsRaised: p.objection ? [p.objection] : [],
     spamFlags: 0,
   };
 }
@@ -248,6 +250,15 @@ export function seedDatabase(force = false): { seeded: boolean } {
         insertEventAt.run(sid, leadId, "qualified", null, mod, `+${qmin} minutes`);
       }
       if (rank >= 2) insertEvent.run(sid, leadId, "demo_offered", null, mod);
+      if (p.objection) {
+        insertEvent.run(
+          sid,
+          leadId,
+          "objection_handled",
+          JSON.stringify({ objection: p.objection }),
+          mod
+        );
+      }
 
       // Meeting + opportunity
       if (rank >= 3) {

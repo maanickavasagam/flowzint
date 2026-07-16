@@ -6,7 +6,9 @@ import {
   listMeetings,
   getKpis,
   getCrmSeries,
+  getScoringWeights,
 } from "@/lib/repo";
+import { maxScoreFor } from "@/lib/scoring";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { CrmView } from "@/components/dashboard/CrmView";
 import { currency } from "@/lib/utils";
@@ -29,6 +31,7 @@ export default function CrmPage() {
   const meetings = listMeetings();
   const kpis = getKpis();
   const series = getCrmSeries();
+  const maxScore = maxScoreFor(getScoringWeights());
 
   return (
     <div className="space-y-6">
@@ -68,6 +71,7 @@ export default function CrmPage() {
       </div>
 
       <CrmView
+        maxScore={maxScore}
         leads={leads.map((l) => ({
           id: l.id,
           contact_name: l.contact_name,

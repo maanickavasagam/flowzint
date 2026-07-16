@@ -51,6 +51,18 @@ export interface QualificationState {
   emailAsks?: number;
 }
 
+/**
+ * Tunable scoring rubric. Persisted in the DB and editable from the dashboard;
+ * changing it re-scores every existing lead.
+ */
+export interface ScoringWeights {
+  budget: { at_or_above: number; vague: number; below: number };
+  timeline: { "<1mo": number; "1-3mo": number; "3mo+": number };
+  useCase: { match: number; vague: number };
+  companySize: { "500+": number; "51-500": number; "1-50": number };
+  thresholds: { hot: number; warm: number };
+}
+
 export interface ScoreBreakdown {
   companySize: number;
   budget: number;

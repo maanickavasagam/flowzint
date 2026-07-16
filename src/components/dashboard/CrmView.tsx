@@ -102,11 +102,14 @@ export function CrmView({
   contacts,
   opportunities,
   meetings,
+  maxScore,
 }: {
   leads: LeadRow[];
   contacts: ContactRow[];
   opportunities: OppRow[];
   meetings: MeetingRow[];
+  /** Max attainable score for the live rubric. */
+  maxScore?: number;
 }) {
   const [query, setQuery] = React.useState("");
   const [sortDesc, setSortDesc] = React.useState(true);
@@ -260,7 +263,11 @@ export function CrmView({
                       {l.contact_company || "—"}
                     </TableCell>
                     <TableCell>
-                      <LeadBadge temperature={l.temperature} score={l.score} />
+                      <LeadBadge
+                        temperature={l.temperature}
+                        score={l.score}
+                        max={maxScore}
+                      />
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={l.status} />
