@@ -24,8 +24,8 @@ export function Hero() {
   React.useEffect(() => {
     const handler = (e: Event) =>
       setChatOpen(Boolean((e as CustomEvent).detail?.open));
-    window.addEventListener("flowzint:chat", handler);
-    return () => window.removeEventListener("flowzint:chat", handler);
+    window.addEventListener("foyer:chat", handler);
+    return () => window.removeEventListener("foyer:chat", handler);
   }, []);
 
   return (
@@ -52,7 +52,7 @@ export function Hero() {
             variants={item}
             className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground"
           >
-            FlowZint drops an AI concierge on your site that qualifies every
+            Foyer drops an AI concierge on your site that qualifies every
             visitor in real time, scores them the moment they&apos;re ready, books
             the meeting, and syncs it all to your CRM. No forms. No lag. No leads
             left behind.
@@ -104,7 +104,7 @@ export function Hero() {
 
             <div className="space-y-3">
               <ChatLine side="bot">
-                Hey! What are you hoping FlowZint can help with?
+                Hey! What are you hoping Foyer can help with?
               </ChatLine>
               <ChatLine side="user">
                 We need to book more demos from our traffic.
@@ -128,7 +128,7 @@ export function Hero() {
                 </span>
               </div>
               <span className="rounded-full bg-hot/20 px-2.5 py-0.5 text-xs font-bold text-hot">
-                Score 9/11
+                Score 11/13
               </span>
             </motion.div>
           </div>

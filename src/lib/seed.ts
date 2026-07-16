@@ -109,13 +109,13 @@ function buildQualification(p: Persona): QualificationState {
 }
 
 const CONVO_SNIPPETS = (p: Persona) => [
-  { role: "assistant", content: "Hi there! I'm Zia, FlowZint's AI concierge 👋 What's your name?" },
+  { role: "assistant", content: "Hi there! I'm Zia, Foyer's AI concierge 👋 What's your name?" },
   { role: "user", content: `Hey, I'm ${p.name.split(" ")[0]}.` },
   { role: "assistant", content: "Great to meet you! What kind of business are you in?" },
   { role: "user", content: `We're in ${p.industry.toLowerCase()}.` },
   { role: "assistant", content: "Nice. Roughly how big is your team?" },
   { role: "user", content: p.sizePhrase },
-  { role: "assistant", content: "What are you hoping FlowZint can help with?" },
+  { role: "assistant", content: "What are you hoping Foyer can help with?" },
   { role: "user", content: p.useCase === "match" ? "Booking more demos from our website traffic." : "Just seeing what's out there." },
 ];
 
@@ -338,6 +338,6 @@ export function seedIfEmpty(): void {
   try {
     if (!isSeeded()) seedDatabase(false);
   } catch (err) {
-    console.error("[flowzint] auto-seed failed:", err);
+    console.error("[foyer] auto-seed failed:", err);
   }
 }

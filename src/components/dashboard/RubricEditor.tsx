@@ -130,7 +130,7 @@ export function RubricEditor({
         <div>
           <h2 className="font-display text-lg font-semibold">Scoring rubric</h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Tune how FlowZint scores intent. Saving re-scores{" "}
+            Tune how Foyer scores intent. Saving re-scores{" "}
             <span className="text-foreground">every existing lead</span>{" "}
             instantly — no black box, no retraining.
           </p>

@@ -34,7 +34,7 @@ interface TurnActions {
   resource?: { title: string; description: string; url: string };
 }
 
-const SID_KEY = "flowzint_sid";
+const SID_KEY = "foyer_sid";
 
 function newSid() {
   return `sess_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
@@ -97,7 +97,7 @@ export function ChatWidget({
   // Let the marketing hero know to hide its decorative mock when we're open.
   React.useEffect(() => {
     window.dispatchEvent(
-      new CustomEvent("flowzint:chat", { detail: { open } })
+      new CustomEvent("foyer:chat", { detail: { open } })
     );
   }, [open]);
 
@@ -264,7 +264,7 @@ export function ChatWidget({
                   Zia
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  FlowZint AI concierge · online
+                  Foyer AI concierge · online
                 </p>
               </div>
               <div className="flex items-center gap-0.5">

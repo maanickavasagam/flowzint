@@ -1,8 +1,8 @@
 {
-  "name": "flowzint",
+  "name": "foyer",
   "version": "1.0.0",
   "private": true,
-  "description": "FlowZint — AI lead capture & conversion system",
+  "description": "Foyer — AI lead capture & conversion system",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

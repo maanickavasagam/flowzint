@@ -57,7 +57,7 @@ const STEPS = [
   {
     n: "02",
     title: "AI qualifies & scores",
-    body: "FlowZint captures industry, size, budget, timeline and use case — then scores intent on a deterministic rubric.",
+    body: "Foyer captures industry, size, budget, timeline and use case — then scores intent on a deterministic rubric.",
   },
   {
     n: "03",
@@ -74,7 +74,7 @@ const STEPS = [
 const TESTIMONIALS = [
   {
     quote:
-      "We plugged FlowZint into our pricing page and booked 41 demos in the first three weeks — from traffic we were already paying for. It's the highest-ROI thing we shipped all quarter.",
+      "We plugged Foyer into our pricing page and booked 41 demos in the first three weeks — from traffic we were already paying for. It's the highest-ROI thing we shipped all quarter.",
     name: "Priya Nadella",
     role: "VP Growth, Latchpoint",
     stat: "+41 demos / 3 wks",
@@ -236,7 +236,7 @@ export default function HomePage() {
                 Stop letting good leads go cold.
               </h2>
               <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-                See FlowZint qualify, score and book a demo live — using the very
+                See Foyer qualify, score and book a demo live — using the very
                 widget in the corner of this page.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">

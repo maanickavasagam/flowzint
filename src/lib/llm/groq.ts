@@ -77,7 +77,7 @@ export async function qualifyWithGroq(
     });
 
     if (!res.ok) {
-      console.error("[flowzint] Groq error", res.status, await res.text());
+      console.error("[foyer] Groq error", res.status, await res.text());
       return null;
     }
 
@@ -85,7 +85,7 @@ export async function qualifyWithGroq(
     const call = data?.choices?.[0]?.message?.tool_calls?.[0];
     const rawArgs = call?.function?.arguments;
     if (!rawArgs) {
-      console.error("[flowzint] Groq returned no tool call");
+      console.error("[foyer] Groq returned no tool call");
       return null;
     }
 
@@ -93,7 +93,7 @@ export async function qualifyWithGroq(
     try {
       input = typeof rawArgs === "string" ? JSON.parse(rawArgs) : rawArgs;
     } catch {
-      console.error("[flowzint] Groq tool args were not valid JSON");
+      console.error("[foyer] Groq tool args were not valid JSON");
       return null;
     }
 
@@ -105,7 +105,7 @@ export async function qualifyWithGroq(
       provider: "groq",
     };
   } catch (err) {
-    console.error("[flowzint] Groq call failed:", err);
+    console.error("[foyer] Groq call failed:", err);
     return null;
   } finally {
     clearTimeout(timeout);

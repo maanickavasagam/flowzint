@@ -20,7 +20,7 @@ export const EMPTY_STATE: QualificationState = {
 
 /** Product context injected into the system prompt so Claude stays on-message. */
 export const PRODUCT_CONTEXT = `
-FlowZint is an AI lead-capture and conversion platform for B2B teams. It embeds a
+Foyer is an AI lead-capture and conversion platform for B2B teams. It embeds a
 smart chat agent on marketing sites that qualifies visitors in real time, scores
 them, books demos automatically, and syncs everything to a built-in CRM.
 Ideal customers: B2B SaaS, agencies, and services companies that get inbound
@@ -41,7 +41,7 @@ export const OBJECTION_REBUTTALS: Record<
   string
 > = {
   too_expensive:
-    "Totally fair to weigh the cost. Most teams recoup FlowZint inside the first month — one customer, Northwind, added $42k in pipeline in 30 days because no inbound lead slipped through overnight. Happy to tailor a plan to your volume.",
+    "Totally fair to weigh the cost. Most teams recoup Foyer inside the first month — one customer, Northwind, added $42k in pipeline in 30 days because no inbound lead slipped through overnight. Happy to tailor a plan to your volume.",
   not_ready:
     "No pressure at all — plenty of teams start when they're ready. Worth noting setup takes under 15 minutes and there's nothing to rip out, so when the timing's right it's a soft landing.",
   need_approval:
@@ -60,7 +60,7 @@ export function routingMessage(
     case "hot":
       return `This sounds like a strong fit${who}. 🎉 Let's get you a tailored walkthrough — pick a time below and it's locked in. Our team's been notified, so you'll get white-glove treatment.`;
     case "warm":
-      return `Thanks${who} — I think FlowZint could genuinely move the needle for you. Grab a quick demo whenever suits you: pick a slot below to confirm.`;
+      return `Thanks${who} — I think Foyer could genuinely move the needle for you. Grab a quick demo whenever suits you: pick a slot below to confirm.`;
     case "cold":
       return `Appreciate you sharing all that${who}. Based on where you're at, I'll send over our "Inbound Conversion Playbook" — it's the fastest way to see the ideas in action. Drop your email below and I'll also keep you posted with the occasional high-signal tip.`;
   }
@@ -69,7 +69,7 @@ export function routingMessage(
 export const NURTURE_RESOURCE = {
   title: "The Inbound Conversion Playbook",
   description:
-    "22 pages on turning anonymous site traffic into booked demos — the exact framework behind FlowZint.",
+    "22 pages on turning anonymous site traffic into booked demos — the exact framework behind Foyer.",
   url: "/docs/inbound-conversion-playbook",
 };
 
@@ -112,7 +112,7 @@ export const FIELD_QUESTIONS: {
   {
     field: "useCaseMatch",
     question:
-      "What are you hoping FlowZint could help with? Tap an option below, or tell me in your own words.",
+      "What are you hoping Foyer could help with? Tap an option below, or tell me in your own words.",
   },
   {
     field: "timelineBucket",
@@ -246,9 +246,9 @@ export const SPAM_SHUTDOWN =
 
 const FAQ: { test: RegExp; answer: string }[] = [
   {
-    test: /\b(what (is|does)|who are|tell me about|what'?s) (flowzint|this|you)|what do you (do|offer)|explain\b/,
+    test: /\b(what (is|does)|who are|tell me about|what'?s) (foyer|this|you)|what do you (do|offer)|explain\b/,
     answer:
-      "FlowZint is an AI concierge for your website — I qualify visitors in real time, figure out who's a great fit, book demos automatically, and sync everything to your team's CRM. Basically, I turn traffic into booked meetings.",
+      "Foyer is an AI concierge for your website — I qualify visitors in real time, figure out who's a great fit, book demos automatically, and sync everything to your team's CRM. Basically, I turn traffic into booked meetings.",
   },
   {
     test: /\bhow (does|do) (it|you|this) work|how would|how can you help\b/,
@@ -263,7 +263,7 @@ const FAQ: { test: RegExp; answer: string }[] = [
   {
     test: /\b(integrat|crm|salesforce|hubspot|slack|calendar|api)\b/,
     answer:
-      "FlowZint has a built-in CRM and can notify your team the instant a hot lead qualifies. It's built to sit alongside the tools you already use.",
+      "Foyer has a built-in CRM and can notify your team the instant a hot lead qualifies. It's built to sit alongside the tools you already use.",
   },
   {
     test: /\b(demo|trial|free|try|test)\b/,

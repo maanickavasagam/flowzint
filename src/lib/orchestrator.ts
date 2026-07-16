@@ -45,7 +45,7 @@ export interface TurnResponse {
 }
 
 const GREETING =
-  "Hi there! I'm Zia, FlowZint's AI concierge 👋 I qualify visitors, answer questions, and book demos. To point you in the right direction — what's your name?";
+  "Hi there! I'm Zia, Foyer's AI concierge 👋 I qualify visitors, answer questions, and book demos. To point you in the right direction — what's your name?";
 
 function currentQuestion(state: QualificationState): string {
   return nextMissingField(state)?.question ?? "";

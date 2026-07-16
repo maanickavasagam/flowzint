@@ -1,4 +1,4 @@
-// Shared domain types for FlowZint.
+// Shared domain types for Foyer.
 
 export type LeadTemperature = "cold" | "warm" | "hot";
 

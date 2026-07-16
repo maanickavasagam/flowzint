@@ -73,7 +73,7 @@ export async function qualifyWithClaude(
       provider: "anthropic",
     };
   } catch (err) {
-    console.error("[flowzint] Claude call failed:", err);
+    console.error("[foyer] Claude call failed:", err);
     return null;
   }
 }

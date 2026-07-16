@@ -15,7 +15,7 @@ export interface HistoryMessage {
   content: string;
 }
 
-export const SYSTEM_PROMPT = `You are "Zia", the friendly AI concierge for FlowZint, embedded on the marketing website.
+export const SYSTEM_PROMPT = `You are "Zia", the friendly AI concierge for Foyer, embedded on the marketing website.
 
 ${PRODUCT_CONTEXT}
 

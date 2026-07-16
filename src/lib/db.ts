@@ -7,12 +7,12 @@ import path from "node:path";
  * the connection on globalThis to avoid opening a new handle on every reload.
  */
 const DB_PATH =
-  process.env.FLOWZINT_DB_PATH ||
-  path.join(process.cwd(), "data", "flowzint.db");
+  process.env.FOYER_DB_PATH ||
+  path.join(process.cwd(), "data", "foyer.db");
 
 declare global {
   // eslint-disable-next-line no-var
-  var __flowzint_db: Database.Database | undefined;
+  var __foyer_db: Database.Database | undefined;
 }
 
 function createConnection(): Database.Database {
@@ -27,10 +27,10 @@ function createConnection(): Database.Database {
 }
 
 export const db: Database.Database =
-  globalThis.__flowzint_db ?? createConnection();
+  globalThis.__foyer_db ?? createConnection();
 
 if (process.env.NODE_ENV !== "production") {
-  globalThis.__flowzint_db = db;
+  globalThis.__foyer_db = db;
 }
 
 function migrate(db: Database.Database) {

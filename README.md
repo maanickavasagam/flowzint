@@ -1,10 +1,10 @@
 <div align="center">
 
-# ⚡ FlowZint
+# ⚡ Foyer
 
 ### AI lead capture & conversion — qualify, score, book, and sync, on autopilot.
 
-FlowZint drops an AI concierge on your marketing site that **qualifies every visitor in real time**, **scores them with a deterministic rubric**, **books demos**, fires **mock Slack alerts** for hot leads, and syncs everything into a **built-in CRM** with **funnel analytics**.
+Foyer drops an AI concierge on your marketing site that **qualifies every visitor in real time**, **scores them with a deterministic rubric**, **books demos**, fires **mock Slack alerts** for hot leads, and syncs everything into a **built-in CRM** with **funnel analytics**.
 
 Next.js 14 · TypeScript · Tailwind · Framer Motion · SQLite · Anthropic Claude
 
@@ -19,7 +19,7 @@ Next.js 14 · TypeScript · Tailwind · Framer Motion · SQLite · Anthropic Cla
 - **Smart routing** — Hot → instant booking + Slack alert; Warm → booking offer; Cold → nurture resource + newsletter capture.
 - **Objection handling** — "too expensive", "not ready", "need approval" and "just exploring" are detected mid-conversation and answered with canned rebuttals.
 - **Anti-troll moderation** — profanity/gibberish answers are rejected and re-prompted (rule-based, no key needed); repeat offenders are flagged and never alert sales.
-- **Answers questions** — a built-in mini-FAQ lets Zia explain what FlowZint does, how it works, and pricing, mid-conversation, plus tappable quick-reply chips.
+- **Answers questions** — a built-in mini-FAQ lets Zia explain what Foyer does, how it works, and pricing, mid-conversation, plus tappable quick-reply chips.
 - **Transparent CRM** — click any lead to see *why* it scored the way it did, every captured answer, and the full transcript.
 - **Optional real integrations** — drop in env vars for real emails (Resend), Slack alerts, or an n8n webhook; all no-op cleanly when unset.
 - **Light & dark themes** — toggle in the nav / dashboard, dark by default, preference persisted.
@@ -51,7 +51,7 @@ npm install
 # 2. (optional) add your Anthropic key for live AI conversation
 cp .env.example .env
 #   → set ANTHROPIC_API_KEY=sk-ant-...
-#   without a key, FlowZint uses its built-in heuristic engine
+#   without a key, Foyer uses its built-in heuristic engine
 
 # 3. Run — the database auto-seeds on first boot
 npm run dev
@@ -219,7 +219,7 @@ The Anthropic key is read **server-side only** — it never reaches the browser 
 
 ## 🚫 Non-goals
 
-By design, FlowZint does **not** implement real Slack/Teams/Calendly OAuth, an A/B-testing framework, a no-code flow builder, multi-tenant auth, or real SMS/email sending. Slack alerts and the calendar are realistic mocks for the demo.
+By design, Foyer does **not** implement real Slack/Teams/Calendly OAuth, an A/B-testing framework, a no-code flow builder, multi-tenant auth, or real SMS/email sending. Slack alerts and the calendar are realistic mocks for the demo.
 
 ## 📄 License
 

@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
 /**
- * FlowZint brand mark — a rising "flow" line with a node, evoking lead flow
- * turning into insight/growth. Distinct from a generic lightning bolt.
+ * Foyer brand mark — a doorway/arch with a visitor dot crossing the threshold.
+ * On-metaphor: a foyer is the room where arriving guests are greeted.
  */
 export function BrandMark({ className }: { className?: string }) {
   return (
@@ -15,27 +15,38 @@ export function BrandMark({ className }: { className?: string }) {
       <svg
         viewBox="0 0 24 24"
         fill="none"
-        className="h-[62%] w-[62%]"
+        className="h-[64%] w-[64%]"
         aria-hidden="true"
       >
+        {/* Doorway arch */}
         <path
-          d="M3 17 L9 10.5 L13.5 14 L21 5.5"
+          d="M5 21V11a7 7 0 0 1 14 0v10"
           stroke="white"
-          strokeWidth="2.2"
+          strokeWidth="2.1"
           strokeLinecap="round"
-          strokeLinejoin="round"
         />
-        <circle cx="21" cy="5.5" r="2.1" fill="white" />
-        <circle cx="3" cy="17" r="1.6" fill="white" fillOpacity="0.7" />
+        {/* Threshold */}
+        <path
+          d="M3 21h18"
+          stroke="white"
+          strokeWidth="2.1"
+          strokeLinecap="round"
+        />
+        {/* The visitor, stepping through */}
+        <circle cx="12" cy="12.5" r="2.3" fill="white" />
       </svg>
     </span>
   );
 }
 
+/**
+ * Wordmark. Solid type against the colourful mark — the restrained pairing real
+ * SaaS brands use, rather than a gradient-split invented word.
+ */
 export function BrandWordmark({ className }: { className?: string }) {
   return (
     <span className={cn("font-display font-bold tracking-tight", className)}>
-      Flow<span className="gradient-text">Zint</span>
+      Foyer
     </span>
   );
 }

@@ -29,7 +29,7 @@ export async function sendEmail(input: {
 }): Promise<boolean> {
   if (gmailEnabled()) return sendViaGmail(input);
   if (resendEnabled()) return sendViaResend(input);
-  console.log(`[flowzint] (email mock) → ${input.to}: ${input.subject}`);
+  console.log(`[foyer] (email mock) → ${input.to}: ${input.subject}`);
   return false;
 }
 
@@ -54,17 +54,17 @@ async function sendViaGmail(input: {
       },
       ...(insecureTls ? { tls: { rejectUnauthorized: false } } : {}),
     });
-    const fromName = process.env.EMAIL_FROM_NAME || "FlowZint";
+    const fromName = process.env.EMAIL_FROM_NAME || "Foyer";
     await transporter.sendMail({
       from: `${fromName} <${process.env.GMAIL_USER}>`,
       to: input.to,
       subject: input.subject,
       html: input.html,
     });
-    console.log(`[flowzint] email sent (gmail) → ${input.to}`);
+    console.log(`[foyer] email sent (gmail) → ${input.to}`);
     return true;
   } catch (err) {
-    console.error("[flowzint] Gmail send failed", err);
+    console.error("[foyer] Gmail send failed", err);
     return false;
   }
 }
@@ -89,13 +89,13 @@ async function sendViaResend(input: {
       }),
     });
     if (!res.ok) {
-      console.error("[flowzint] Resend error", res.status, await res.text());
+      console.error("[foyer] Resend error", res.status, await res.text());
       return false;
     }
-    console.log(`[flowzint] email sent (resend) → ${input.to}`);
+    console.log(`[foyer] email sent (resend) → ${input.to}`);
     return true;
   } catch (err) {
-    console.error("[flowzint] Resend send failed", err);
+    console.error("[foyer] Resend send failed", err);
     return false;
   }
 }
@@ -107,14 +107,14 @@ export async function sendBookingConfirmation(input: {
 }): Promise<boolean> {
   return sendEmail({
     to: input.to,
-    subject: `Your FlowZint demo is confirmed — ${input.slotLabel}`,
+    subject: `Your Foyer demo is confirmed — ${input.slotLabel}`,
     html: `
       <div style="font-family:Inter,Arial,sans-serif;max-width:520px;margin:auto">
         <h2 style="color:#7c3aed">You're booked, ${escapeHtml(input.name)}! 🎉</h2>
-        <p>Your FlowZint demo is confirmed for:</p>
+        <p>Your Foyer demo is confirmed for:</p>
         <p style="font-size:18px;font-weight:600">${escapeHtml(input.slotLabel)}</p>
-        <p>We'll send a calendar invite shortly. Can't wait to show you FlowZint in action.</p>
-        <p style="color:#888;font-size:12px">— The FlowZint team</p>
+        <p>We'll send a calendar invite shortly. Can't wait to show you Foyer in action.</p>
+        <p style="color:#888;font-size:12px">— The Foyer team</p>
       </div>`,
   });
 }
@@ -131,7 +131,7 @@ export async function notifyHotLead(title: string, body: string): Promise<boolea
     });
     return true;
   } catch (err) {
-    console.error("[flowzint] Slack webhook failed", err);
+    console.error("[foyer] Slack webhook failed", err);
     return false;
   }
 }
@@ -151,7 +151,7 @@ export async function triggerN8n(
     });
     return true;
   } catch (err) {
-    console.error("[flowzint] n8n webhook failed", err);
+    console.error("[foyer] n8n webhook failed", err);
     return false;
   }
 }

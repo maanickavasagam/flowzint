@@ -41,7 +41,7 @@ export function BookDemoForm() {
     try {
       let sid = "";
       try {
-        sid = localStorage.getItem("flowzint_sid") || "";
+        sid = localStorage.getItem("foyer_sid") || "";
       } catch {
         /* ignore */
       }
@@ -91,7 +91,7 @@ export function BookDemoForm() {
         <p className="mt-4 text-sm text-muted-foreground">
           We&apos;ve sent a calendar invite to{" "}
           <span className="text-foreground">{email}</span>. Can&apos;t wait to
-          show you FlowZint in action.
+          show you Foyer in action.
         </p>
       </motion.div>
     );

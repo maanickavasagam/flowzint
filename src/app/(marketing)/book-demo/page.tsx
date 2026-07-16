@@ -32,10 +32,10 @@ export default function BookDemoPage() {
             Live in a day · no card required
           </span>
           <h1 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-            Book your <span className="gradient-text">FlowZint</span> demo
+            Book your <span className="gradient-text">Foyer</span> demo
           </h1>
           <p className="mt-4 max-w-md text-lg text-muted-foreground">
-            Grab a slot and we&apos;ll show you exactly how FlowZint turns your
+            Grab a slot and we&apos;ll show you exactly how Foyer turns your
             traffic into booked meetings — using your own funnel as the example.
           </p>
 

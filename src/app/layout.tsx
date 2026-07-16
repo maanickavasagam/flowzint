@@ -18,12 +18,12 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "FlowZint — AI that turns website visitors into booked demos",
+  title: "Foyer — AI that turns website visitors into booked demos",
   description:
-    "FlowZint is an AI lead-capture and conversion platform. Qualify visitors in real time, score them automatically, book demos, and sync everything to a built-in CRM.",
-  metadataBase: new URL("https://flowzint.example.com"),
+    "Foyer is an AI lead-capture and conversion platform. Qualify visitors in real time, score them automatically, book demos, and sync everything to a built-in CRM.",
+  metadataBase: new URL("https://foyer.example.com"),
   openGraph: {
-    title: "FlowZint — AI Lead Capture & Conversion",
+    title: "Foyer — AI Lead Capture & Conversion",
     description:
       "Qualify, score, and convert inbound traffic on autopilot with an AI concierge.",
     type: "website",

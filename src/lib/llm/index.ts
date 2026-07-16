@@ -39,11 +39,11 @@ export async function qualifyTurn(
   if (provider === "groq") {
     const result = await qualifyWithGroq(history, state);
     if (result) return result;
-    console.warn("[flowzint] Groq unavailable — falling back to rules engine");
+    console.warn("[foyer] Groq unavailable — falling back to rules engine");
   } else if (provider === "anthropic") {
     const result = await qualifyWithClaude(history, state);
     if (result) return result;
-    console.warn("[flowzint] Claude unavailable — falling back to rules engine");
+    console.warn("[foyer] Claude unavailable — falling back to rules engine");
   }
 
   return fallbackTurn(history, state);
