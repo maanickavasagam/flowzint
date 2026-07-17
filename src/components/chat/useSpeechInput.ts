@@ -17,6 +17,9 @@ interface SpeechRecognitionEventLike extends Event {
     [i: number]: SpeechRecognitionResultLike;
   };
 }
+interface SpeechRecognitionErrorEventLike extends Event {
+  error: string;
+}
 interface SpeechRecognitionLike extends EventTarget {
   lang: string;
   continuous: boolean;
@@ -25,7 +28,7 @@ interface SpeechRecognitionLike extends EventTarget {
   stop(): void;
   abort(): void;
   onresult: ((e: SpeechRecognitionEventLike) => void) | null;
-  onerror: ((e: Event) => void) | null;
+  onerror: ((e: SpeechRecognitionErrorEventLike) => void) | null;
   onend: (() => void) | null;
 }
 type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
@@ -39,6 +42,24 @@ function getCtor(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
+function errorMessage(code: string): string | null {
+  switch (code) {
+    case "not-allowed":
+    case "service-not-allowed":
+      return "Microphone access is blocked. Check your browser's site permissions.";
+    case "network":
+      return "Couldn't reach the speech service — check your connection.";
+    case "no-speech":
+      return null; // not a real error, user just didn't say anything
+    case "aborted":
+      return null; // we triggered this ourselves (unmount/stop)
+    case "audio-capture":
+      return "No microphone found.";
+    default:
+      return "Voice input hit a snag — try again.";
+  }
+}
+
 /**
  * Browser-native speech-to-text for the chat composer. Free, no API, no key.
  * `supported` is false on browsers without the Web Speech API (e.g. Firefox),
@@ -47,7 +68,11 @@ function getCtor(): SpeechRecognitionCtor | null {
 export function useSpeechInput(onTranscript: (text: string) => void) {
   const [listening, setListening] = React.useState(false);
   const [supported, setSupported] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const recognitionRef = React.useRef<SpeechRecognitionLike | null>(null);
+  // Accumulates finalized phrases across the whole session, so a pause
+  // mid-sentence doesn't wipe out what was already dictated.
+  const finalTextRef = React.useRef("");
   // Keep the latest callback without re-creating the recognizer each render.
   const cbRef = React.useRef(onTranscript);
   cbRef.current = onTranscript;
@@ -59,17 +84,28 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
 
     const rec = new Ctor();
     rec.lang = "en-US";
-    rec.continuous = false;
+    // Keep listening through natural pauses instead of stopping after the
+    // first one — a visitor saying a full sentence needs this.
+    rec.continuous = true;
     rec.interimResults = true;
 
     rec.onresult = (e) => {
-      let text = "";
+      let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        text += e.results[i][0].transcript;
+        const chunk = e.results[i][0].transcript;
+        if (e.results[i].isFinal) {
+          finalTextRef.current += chunk;
+        } else {
+          interim += chunk;
+        }
       }
-      cbRef.current(text);
+      cbRef.current((finalTextRef.current + interim).trim());
     };
-    rec.onerror = () => setListening(false);
+    rec.onerror = (e) => {
+      setListening(false);
+      const msg = errorMessage(e.error);
+      if (msg) setError(msg);
+    };
     rec.onend = () => setListening(false);
 
     recognitionRef.current = rec;
@@ -94,6 +130,8 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
       setListening(false);
       return;
     }
+    setError(null);
+    finalTextRef.current = "";
     try {
       rec.start();
       setListening(true);
@@ -102,5 +140,5 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
     }
   }, [listening]);
 
-  return { listening, supported, toggle };
+  return { listening, supported, toggle, error };
 }

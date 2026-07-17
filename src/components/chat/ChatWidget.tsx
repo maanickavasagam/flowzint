@@ -59,8 +59,12 @@ export function ChatWidget({
   const [unread, setUnread] = React.useState(0);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   // Browser-native voice input — dictates straight into the composer.
-  const { listening, supported: micSupported, toggle: toggleMic } =
-    useSpeechInput((text) => setInput(text));
+  const {
+    listening,
+    supported: micSupported,
+    toggle: toggleMic,
+    error: micError,
+  } = useSpeechInput((text) => setInput(text));
 
   // Load / persist session id.
   React.useEffect(() => {
@@ -342,6 +346,20 @@ export function ChatWidget({
                 ))}
               </div>
             )}
+
+            {/* Mic error */}
+            <AnimatePresence>
+              {micError && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden border-t border-hot/20 bg-hot/10 px-4 py-2 text-xs text-hot"
+                >
+                  {micError}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Composer */}
             <form
