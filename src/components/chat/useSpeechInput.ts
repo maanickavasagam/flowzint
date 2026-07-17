@@ -135,8 +135,14 @@ export function useSpeechInput(onTranscript: (text: string) => void) {
     try {
       rec.start();
       setListening(true);
-    } catch {
-      // start() throws if already running — treat as a no-op.
+    } catch (err) {
+      // "already started" is a harmless double-click race — ignore it.
+      // Anything else (blocked by permissions policy, no mic device, etc.)
+      // must be surfaced, or the button just looks unresponsive.
+      const name = err instanceof DOMException ? err.name : "";
+      if (name !== "InvalidStateError") {
+        setError("Couldn't start voice input — try clicking the mic again.");
+      }
     }
   }, [listening]);
 
