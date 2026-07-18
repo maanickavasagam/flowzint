@@ -9,10 +9,15 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20.18.0
-      - key: FLOWZINT_DB_PATH
+      - key: FOYER_DB_PATH
         value: /opt/render/project/src/data/foyer.db
+      # Domain allowed to sign in to the admin dashboards.
+      - key: ADMIN_EMAIL_DOMAIN
+        value: foyer.com
       # Set these in the Render dashboard (Environment tab) — do not commit
       # real values to this file:
+      #   ADMIN_PASSWORD      (REQUIRED — the shared dashboard password)
+      #   AUTH_SECRET         (REQUIRED — long random string, signs sessions)
       #   GROQ_API_KEY
       #   GROQ_MODEL          (optional, defaults to llama-3.3-70b-versatile)
       #   GMAIL_USER

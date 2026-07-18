@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 import { NotificationBell } from "./NotificationBell";
 import { MobileTopNav } from "./Sidebar";
+import { UserMenu } from "./UserMenu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const TITLES: Record<string, { title: string; subtitle: string }> = {
   "/crm": {
@@ -21,7 +21,7 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   },
 };
 
-export function Topbar() {
+export function Topbar({ email }: { email: string }) {
   const pathname = usePathname();
   const meta = TITLES[pathname] || { title: "Dashboard", subtitle: "" };
 
@@ -40,11 +40,7 @@ export function Topbar() {
           <MobileTopNav />
           <ThemeToggle />
           <NotificationBell />
-          <Avatar className="h-10 w-10 border border-border">
-            <AvatarFallback className="bg-gradient-to-br from-violet to-[hsl(280_90%_60%)] text-white">
-              SB
-            </AvatarFallback>
-          </Avatar>
+          <UserMenu email={email} />
         </div>
       </div>
     </header>

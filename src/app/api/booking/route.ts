@@ -57,9 +57,12 @@ export async function POST(req: NextRequest) {
       slotLabel: slotLabel || new Date(slotIso).toLocaleString(),
     });
 
+    // A chat-driven booking carries a session; a direct /book-demo booking
+    // doesn't. The temperature/opportunity bits only apply when we have one.
+    const temperature = session?.temperature ?? "warm";
+
     if (session) {
       updateSession(session.id, { status: "booked" });
-      logEvent({ sessionId: session.id, leadId, type: "meeting_booked" });
       if (leadId) {
         setLeadStatus(leadId, "booked");
         // Booked leads become opportunities.
@@ -68,8 +71,8 @@ export async function POST(req: NextRequest) {
           contactId: contactId!,
           name: `${name} — booked demo`,
           stage: "demo_scheduled",
-          amount: session.temperature === "hot" ? 24000 : 12000,
-          probability: session.temperature === "hot" ? 65 : 45,
+          amount: temperature === "hot" ? 24000 : 12000,
+          probability: temperature === "hot" ? 65 : 45,
         });
         logEvent({
           sessionId: session.id,
@@ -77,17 +80,21 @@ export async function POST(req: NextRequest) {
           type: "opportunity_created",
         });
       }
-      createNotification({
-        leadId,
-        sessionId: session.id,
-        channel: "#sales-demos",
-        title: `📅 Demo booked: ${name}`,
-        body: `${name} confirmed a demo for ${
-          slotLabel || slotIso
-        }. Calendar invite sent.`,
-        temperature: session.temperature,
-      });
     }
+
+    // Fire the alert + log the event for EVERY booking, chat-driven or direct,
+    // so the dashboard and analytics always reflect it.
+    logEvent({ sessionId: session?.id ?? null, leadId, type: "meeting_booked" });
+    createNotification({
+      leadId,
+      sessionId: session?.id ?? null,
+      channel: "#sales-demos",
+      title: `📅 Demo booked: ${name}`,
+      body: `${name} confirmed a demo for ${
+        slotLabel || slotIso
+      }. Calendar invite sent.`,
+      temperature,
+    });
 
     // Best-effort real-world side effects (no-op unless env vars are set).
     const emailed = await sendBookingConfirmation({
